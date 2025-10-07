@@ -27,7 +27,6 @@ const CommandInterface: React.FC = () => {
     {
       id: '1',
       type: 'ai',
-      content: 'Good evening! I\'m Nexus Sentinel AI, your autonomous event safety intelligence system powered by Google\'s advanced AI stack. I continuously learn from real-time data, reason through complex scenarios, and act autonomously to ensure event safety. I can analyze patterns, predict risks, coordinate responses, and provide intelligent insights. How can I assist you today?',
       content: 'Good evening! I\'m Echoplex AI, your autonomous event safety intelligence system powered by Google\'s advanced AI stack. I continuously learn from real-time data, reason through complex scenarios, and act autonomously to ensure event safety. I can analyze patterns, predict risks, coordinate responses, and provide intelligent insights. How can I assist you today?',
       timestamp: new Date(Date.now() - 300000),
       metadata: {
