@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, MapPin, Users, Clock, AlertTriangle, Camera, Bone as Drone, Activity, Zap, Shield } from 'lucide-react';
+import { TrendingUp, MapPin, Users, Clock, AlertTriangle, Camera, Bone as Drone, Activity, Zap, Shield, QrCode } from 'lucide-react';
+import ZoneIntelligenceOverview from './ZoneIntelligenceOverview';
+import ZoneQRManager from './ZoneQRManager';
 
 const EventOverview: React.FC = () => {
+  const [activeView, setActiveView] = useState<'overview' | 'zones' | 'qr-manager'>('overview');
   const [crowdDensity, setCrowdDensity] = useState(0.72);
   const [weatherRisk, setWeatherRisk] = useState(0.15);
   const [securityScore, setSecurityScore] = useState(0.91);
@@ -16,6 +19,54 @@ const EventOverview: React.FC = () => {
     }, 2000);
     return () => clearInterval(interval);
   }, []);
+
+  if (activeView === 'zones') {
+    return (
+      <div className="space-y-6">
+        {/* Navigation */}
+        <div className="flex space-x-4">
+          <button
+            onClick={() => setActiveView('overview')}
+            className="px-4 py-2 bg-slate-700/50 text-slate-300 hover:text-white rounded-lg transition-colors"
+          >
+            ← Back to Overview
+          </button>
+          <button
+            onClick={() => setActiveView('qr-manager')}
+            className="px-4 py-2 bg-cyan-600/20 text-cyan-400 hover:bg-cyan-600/30 rounded-lg transition-colors flex items-center"
+          >
+            <QrCode className="h-4 w-4 mr-2" />
+            QR Code Manager
+          </button>
+        </div>
+        <ZoneIntelligenceOverview />
+      </div>
+    );
+  }
+
+  if (activeView === 'qr-manager') {
+    return (
+      <div className="space-y-6">
+        {/* Navigation */}
+        <div className="flex space-x-4">
+          <button
+            onClick={() => setActiveView('overview')}
+            className="px-4 py-2 bg-slate-700/50 text-slate-300 hover:text-white rounded-lg transition-colors"
+          >
+            ← Back to Overview
+          </button>
+          <button
+            onClick={() => setActiveView('zones')}
+            className="px-4 py-2 bg-cyan-600/20 text-cyan-400 hover:bg-cyan-600/30 rounded-lg transition-colors flex items-center"
+          >
+            <MapPin className="h-4 w-4 mr-2" />
+            Live Zone Intelligence
+          </button>
+        </div>
+        <ZoneQRManager />
+      </div>
+    );
+  }
 
   const zones = [
     { name: 'Main Stage', capacity: 25000, current: 23400, risk: 'high', trend: 'increasing' },
@@ -182,10 +233,28 @@ const EventOverview: React.FC = () => {
 
       {/* Enhanced Zone Status */}
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
-        <h3 className="text-xl font-semibold mb-6 flex items-center">
-          <MapPin className="h-6 w-6 mr-3 text-cyan-400" />
-          Zone Intelligence Overview
-        </h3>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold flex items-center">
+            <MapPin className="h-6 w-6 mr-3 text-cyan-400" />
+            Zone Intelligence Overview
+          </h3>
+          <div className="flex space-x-3">
+            <button
+              onClick={() => setActiveView('zones')}
+              className="bg-gradient-to-r from-cyan-600 to-teal-700 hover:from-cyan-700 hover:to-teal-800 text-white px-4 py-2 rounded-lg transition-all duration-200 transform hover:scale-[1.02] flex items-center space-x-2"
+            >
+              <QrCode className="h-4 w-4" />
+              <span>Live Zone Intelligence</span>
+            </button>
+            <button
+              onClick={() => setActiveView('qr-manager')}
+              className="bg-slate-700/50 text-slate-300 hover:text-white hover:bg-slate-600/50 px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
+            >
+              <QrCode className="h-4 w-4" />
+              <span>QR Manager</span>
+            </button>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {zones.map((zone) => (
             <div key={zone.name} className="bg-slate-700/30 rounded-xl p-5 border border-slate-600/30 hover:border-slate-500/50 transition-all">
@@ -217,6 +286,17 @@ const EventOverview: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+        
+        {/* QR Code Integration Notice */}
+        <div className="mt-6 bg-cyan-900/20 border border-cyan-700/30 rounded-lg p-4">
+          <div className="flex items-center space-x-3">
+            <QrCode className="h-6 w-6 text-cyan-400" />
+            <div>
+              <div className="text-cyan-400 font-medium">QR Code Zone Tracking Available</div>
+              <div className="text-slate-300 text-sm">Real-time occupancy tracking via QR code check-ins at zone entrances. Click "Live Zone Intelligence" for detailed monitoring.</div>
+            </div>
+          </div>
         </div>
       </div>
 
