@@ -383,16 +383,31 @@ const getPercentageFull = (current: number, capacity: number) => {
             Live AI Camera Network
           </h3>
           <div className="grid grid-cols-2 gap-4 mb-4">
+            
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
-                <div className="bg-slate-600/50 h-24 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden">
-                  <Camera className="h-8 w-8 text-slate-400" />
-                  <div className="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                </div>
-                <div className="text-sm text-slate-300 font-medium">Camera {i}</div>
-                <div className="text-xs text-emerald-400">AI Processing Active</div>
-              </div>
-            ))}
+  <div key={i} className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
+    <div className="bg-slate-600/50 h-24 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden">
+      {i === 1 ? (
+        // Camera 1 - shows video
+        <video
+          className="w-full h-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+          src="public/videos/sample-camera-1.mp4"
+        />
+      ) : (
+        // Cameras 2, 3, 4 - show icon
+        <Camera className="h-8 w-8 text-slate-400" />
+      )}
+      <div className="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+    </div>
+    <div className="text-sm text-slate-300 font-medium">Camera {i}</div>
+    <div className="text-xs text-emerald-400">AI Processing Active</div>
+  </div>
+))}
+            
           </div>
           <div className="bg-cyan-900/20 rounded-lg p-3 border border-cyan-700/30">
             <div className="text-sm text-cyan-400 font-medium">Network Status</div>
@@ -409,7 +424,7 @@ const getPercentageFull = (current: number, capacity: number) => {
             {[
               { id: 'D-001', location: 'Main Stage Perimeter', battery: 85, status: 'Patrolling', mission: 'Crowd monitoring' },
               { id: 'D-002', location: 'Food Court Area', battery: 62, status: 'Investigating', mission: 'Anomaly response' },
-              { id: 'D-003', location: 'West Gate', battery: 91, status: 'Standby', mission: 'Ready for dispatch' },
+              { id: 'D-003', location: 'VIP Section', battery: 91, status: 'Standby', mission: 'Ready for dispatch' },
               { id: 'D-004', location: 'Base Station', battery: 23, status: 'Charging', mission: 'Battery replacement' },
             ].map((drone) => (
               <div key={drone.id} className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">

@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Activity, AlertTriangle, Users, MapPin, Camera, Radio, Search, Bone as Drone, Shield, Zap, Brain, Eye, MonitorCheck} from 'lucide-react';
 import CrowdMonitor from './CrowdMonitor';
 import RiskAssessment from './RiskAssessment';
-import IncidentManagement from './IncidentManagement';
-import ResourceDispatch from './ResourceDispatch';
-import AnomalyDetection from './AnomalyDetection';
+//import IncidentManagement from './IncidentManagement';
+//import ResourceDispatch from './ResourceDispatch';
+//import AnomalyDetection from './AnomalyDetection';
 import LostAndFound from './LostAndFound';
 import CommandInterface from './CommandInterface';
 import EventOverview from './EventOverview';
@@ -59,11 +59,11 @@ const Dashboard: React.FC = () => {
         setAlertLevel(levels[Math.floor(Math.random() * levels.length)]);
       }
       
-      // Simulate incident count changes
+      //Simulate incident count changes
       if (Math.random() < 0.15) {
         setActiveIncidents(prev => Math.max(0, Math.min(10, prev + Math.floor(Math.random() * 3 - 1))));
       }
-    }, 3000);
+    }, 3000); 
 
     return () => {
       
@@ -78,9 +78,9 @@ const Dashboard: React.FC = () => {
     { id: 'overview', label: 'Event Overview', icon: Activity, description: 'Real-time event status' },
     { id: 'crowd', label: 'Crowd Intelligence', icon: Users, description: 'AI crowd analysis' },
     { id: 'risk', label: 'Risk Assessment', icon: Shield, description: 'Predictive safety analytics' },
-    { id: 'incidents', label: 'Incident Command', icon: AlertTriangle, description: 'Active incident management' },
-    { id: 'resources', label: 'Resource Dispatch', icon: Radio, description: 'Dynamic resource allocation' },
-    { id: 'anomalies', label: 'AI Detection', icon: Zap, description: 'Multimodal anomaly detection' },
+    //{ id: 'incidents', label: 'Incident Command', icon: AlertTriangle, description: 'Active incident management' },
+    //{ id: 'resources', label: 'Resource Dispatch', icon: Radio, description: 'Dynamic resource allocation' },
+    //{ id: 'anomalies', label: 'AI Detection', icon: Zap, description: 'Multimodal anomaly detection' },
     { id: 'lost-found', label: 'Lost & Found AI', icon: Search, description: 'Facial recognition search' },
     { id: 'command', label: 'AI Command', icon: Brain, description: 'Natural language intelligence' },
     
@@ -109,9 +109,9 @@ const Dashboard: React.FC = () => {
       case 'overview': return <EventOverview />;
       case 'crowd': return <CrowdMonitor />;
       case 'risk': return <RiskAssessment />;
-      case 'incidents': return <IncidentManagement />;
-      case 'resources': return <ResourceDispatch />;
-      case 'anomalies': return <AnomalyDetection />;
+      //case 'incidents': return <IncidentManagement />;
+      //case 'resources': return <ResourceDispatch />;
+      //case 'anomalies': return <AnomalyDetection />;
       case 'lost-found': return <LostAndFound />;
       case 'command': return <CommandInterface />;
       default: return <EventOverview />;
@@ -147,10 +147,7 @@ const Dashboard: React.FC = () => {
             <div className="text-right">
               <div className="text-sm text-slate-400">Total Attendees</div>
               <div className="text-xl font-bold text-white">{totalAttendees.toLocaleString()}</div>
-            </div>
-            <div className="text-right">
-              <div className="text-sm text-slate-400">Active Incidents</div>
-              <div className="text-xl font-bold text-amber-400">{activeIncidents}</div>
+            
             </div>
             <div className="flex items-center space-x-3 bg-slate-700/30 rounded-lg px-4 py-2">
               <div className={`h-3 w-3 rounded-full animate-pulse shadow-lg ${getAlertColor(alertLevel)}`}></div>
