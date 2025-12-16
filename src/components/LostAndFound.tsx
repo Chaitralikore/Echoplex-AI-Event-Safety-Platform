@@ -59,8 +59,15 @@ const LostAndFound: React.FC = () => {
     confidence: number;
     photoUrl?: string;
   } | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [isVideoScanning, setIsVideoScanning] = useState(false);
+  const [videoScanStatus, setVideoScanStatus] = useState<string>('');
+  const [videoMatches, setVideoMatches] = useState<
+    { caseId: string; fullName: string; bestConfidence: number; hits: number; photoUrl?: string }[]
+  >([]);
   const webcamRef = useRef<Webcam>(null);
   const scanIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
   const [newReport, setNewReport] = useState({
     name: '',
     age: '',
@@ -92,7 +99,7 @@ const LostAndFound: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch('http://127.0.0.1:8001/api/detect', {
+      const res = await fetch('http://127.0.0.1:8002/api/detect', {
         method: 'POST',
         body: formData
       });
@@ -144,7 +151,7 @@ const LostAndFound: React.FC = () => {
       formData.append('file', blob, 'frame.jpg');
 
       // Use the combined scan endpoint for person detection + face matching
-      const res = await fetch('http://127.0.0.1:8001/api/scan', {
+      const res = await fetch('http://127.0.0.1:8002/api/scan', {
         method: 'POST',
         body: formData
       });
@@ -208,6 +215,110 @@ const LostAndFound: React.FC = () => {
       setScanStatus('Detection server not available. Start the backend with: python main.py');
     }
   }, [missingPersons]);
+
+  const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setVideoFile(file);
+
+      // Update preview URL
+      const url = URL.createObjectURL(file);
+      // Revoke previous URL if any
+      if (videoPreviewUrl) {
+        URL.revokeObjectURL(videoPreviewUrl);
+      }
+      setVideoPreviewUrl(url);
+
+      setVideoMatches([]);
+      setVideoScanStatus('');
+    }
+  };
+
+  const handleScanVideo = async () => {
+    if (!videoFile) {
+      alert('Please select a video file first.');
+      return;
+    }
+
+    setIsVideoScanning(true);
+    setVideoScanStatus('Uploading and analyzing video...');
+    setVideoMatches([]);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', videoFile);
+
+      const res = await fetch('http://127.0.0.1:8002/api/scan-video', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) {
+        console.error('Video scan error', await res.text());
+        setVideoScanStatus('Video scan failed (server error).');
+        return;
+      }
+
+      const data = await res.json();
+      const matches: Array<{
+        caseId: string;
+        fullName?: string;
+        bestConfidence?: number;
+        photoUrl?: string;
+        hits?: number;
+        position?: 'left' | 'center' | 'right' | null;
+      }> = data.matches || [];
+
+      setVideoScanStatus(
+        `Analyzed ${data.frames_analyzed || 0} frames. ${matches.length || 0} potential match(es) found.`
+      );
+      setVideoMatches(matches);
+
+      // Update global stats so Face Scans / Success Rate reflect video analysis too
+      const framesAnalyzed = data.frames_analyzed || 0;
+      if (framesAnalyzed > 0) {
+        const scansRef = ref(db, 'stats/aiFaceScans');
+        await runTransaction(scansRef, (current) => (current || 0) + framesAnalyzed);
+      }
+      const totalHits = matches.reduce((sum, m) => sum + (m.hits || 0), 0);
+      if (totalHits > 0) {
+        const facesRef = ref(db, 'stats/facesDetected');
+        await runTransaction(facesRef, (current) => (current || 0) + totalHits);
+      }
+      if (matches.length > 0) {
+        const matchesRef = ref(db, 'stats/matchesConfirmed');
+        await runTransaction(matchesRef, (current) => (current || 0) + matches.length);
+      }
+
+      // For each matched person, update their status in Firebase to \"potential-match\"
+      for (const match of matches) {
+        const name = (match.fullName || '').toLowerCase();
+        if (!name) continue;
+
+        const person = missingPersons.find(
+          (p) => p.name.toLowerCase() === name && p.status === 'searching'
+        );
+
+        if (person) {
+          const personRef = ref(db, `missingPersons/${person.id}`);
+          try {
+            await update(personRef, {
+              status: 'potential-match',
+              aiMatchConfidence: (match.bestConfidence || 0) / 100,
+              currentLocation: 'Video analysis'
+            });
+          } catch (updateErr) {
+            console.warn('Failed to update person status from video match:', updateErr);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Video scan error:', err);
+      setVideoScanStatus('Could not analyze video.');
+    } finally {
+      setIsVideoScanning(false);
+    }
+  };
 
   // Start continuous scanning
   const startScanning = useCallback(() => {
@@ -337,7 +448,7 @@ const LostAndFound: React.FC = () => {
         formData.append('referencePhoto', newReport.photoFile);
 
         try {
-          const res = await fetch('http://127.0.0.1:8001/cases', {
+          const res = await fetch('http://127.0.0.1:8002/cases', {
             method: 'POST',
             body: formData
           });
@@ -345,7 +456,7 @@ const LostAndFound: React.FC = () => {
           if (res.ok) {
             const data = await res.json();
             console.log('Case registered with backend for face matching:', data);
-            photoUrl = `http://127.0.0.1:8001/uploads/${data.caseId}`;
+            photoUrl = `http://127.0.0.1:8002/uploads/${data.caseId}`;
           } else {
             console.warn('Backend registration failed, continuing with Firebase only');
           }
@@ -468,161 +579,259 @@ const LostAndFound: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Live Camera + AI Analytics */}
+      {/* Live Camera + Upload Video + AI Analytics */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
-          <h3 className="text-sm text-gray-300 mb-2">Live Camera Preview</h3>
-          {cameraEnabled ? (
-            <div className="space-y-3">
-              <div className="relative">
-                <Webcam
-                  ref={webcamRef}
-                  audio={false}
-                  screenshotFormat="image/jpeg"
-                  videoConstraints={videoConstraints}
-                  className="rounded-lg w-full"
-                />
-                {isScanning && (
-                  <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-lg text-xs flex items-center animate-pulse">
-                    <div className="w-2 h-2 bg-white rounded-full mr-2 animate-ping" />
-                    SCANNING
-                  </div>
-                )}
-                {detectedPersons > 0 && (
-                  <div className="absolute top-2 right-2 bg-green-600 text-white px-2 py-1 rounded-lg text-xs">
-                    {detectedPersons} person(s) detected
-                  </div>
-                )}
+        {/* LEFT: Upload Video Preview + controls */}
+        <div className="space-y-4">
+          <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
+            <h3 className="text-sm text-gray-300 mb-2">Upload Video Preview</h3>
+            {videoPreviewUrl ? (
+              <video
+                src={videoPreviewUrl}
+                controls
+                className="w-full rounded-lg bg-black"
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center bg-gray-900/50 rounded-lg py-12">
+                <Camera className="h-12 w-12 text-gray-500 mb-4" />
+                <p className="text-gray-400 mb-2 text-center">
+                  Upload a crowd video to search for missing persons across the scene.
+                </p>
               </div>
-              
-              {/* Match Result Display */}
-              {matchResult && (
-                <div className="bg-gradient-to-r from-green-900/80 to-green-800/80 border-2 border-green-500 rounded-lg p-4 animate-pulse">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <CheckCircle className="h-8 w-8 text-green-400" />
-                      <div>
-                        <p className="text-green-300 text-sm font-medium">MATCH FOUND!</p>
-                        <p className="text-white text-lg font-bold">{matchResult.name}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-green-300 text-sm">Confidence</p>
-                      <p className="text-3xl font-bold text-white">{matchResult.confidence}%</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setMatchResult(null)}
-                    className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded text-sm"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              )}
+            )}
+          </div>
 
-              {/* Scan Status */}
-              {scanStatus && !matchResult && (
-                <div className={`text-sm px-3 py-2 rounded-lg ${
-                  scanStatus.includes('MATCH FOUND') 
-                    ? 'bg-green-900/50 text-green-300 font-bold' 
-                    : scanStatus.includes('error') || scanStatus.includes('not available')
-                    ? 'bg-red-900/50 text-red-300'
-                    : 'bg-blue-900/50 text-blue-300'
-                }`}>
-                  {scanStatus}
-                </div>
+          {/* Video Upload Crowd Scan (moved under Upload Video Preview) */}
+          <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 space-y-3">
+            <h4 className="text-sm text-gray-200">Upload Video for Crowd Search</h4>
+            <p className="text-xs text-gray-400">
+              Upload a recording (MP4, MOV, etc.). The system will sample frames and look for any
+              missing persons stored in the database, even in crowded scenes.
+            </p>
+            <input
+              type="file"
+              accept="video/*"
+              onChange={handleVideoFileChange}
+              className="w-full text-sm text-gray-200 file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer bg-gray-900/50 border border-gray-700 rounded-lg px-3 py-2"
+            />
+            <button
+              onClick={handleScanVideo}
+              disabled={!videoFile || isVideoScanning}
+              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+            >
+              {isVideoScanning ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Analyzing video...
+                </>
+              ) : (
+                <>
+                  <Camera className="h-4 w-4" />
+                  Scan Video
+                </>
               )}
-              
-              <div className="flex gap-2">
-                {!isScanning ? (
-                  <button
-                    onClick={startScanning}
-                    className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-2 px-4 rounded-lg transition-all flex items-center justify-center"
+            </button>
+            {videoScanStatus && (
+              <p className="text-xs text-blue-300 bg-blue-900/40 rounded-lg px-3 py-2">
+                {videoScanStatus}
+              </p>
+            )}
+            {videoMatches.length > 0 && (
+              <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
+                {videoMatches.map((m) => (
+                  <div
+                    key={m.caseId}
+                    className="bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-xs flex items-center gap-3"
                   >
-                    <Zap className="h-4 w-4 mr-2" />
-                    Start Scan
-                  </button>
-                ) : (
-                  <button
-                    onClick={stopScanning}
-                    className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2 px-4 rounded-lg transition-all flex items-center justify-center"
-                  >
-                    <StopCircle className="h-4 w-4 mr-2" />
-                    Stop Scan
-                  </button>
-                )}
-                <button
-                  onClick={() => {
-                    stopScanning();
-                    setCameraEnabled(false);
-                  }}
-                  className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition-colors"
-                >
-                  Close
-                </button>
+                    {m.photoUrl && (
+                      <img
+                        src={m.photoUrl}
+                        alt={m.fullName || 'Matched person photo'}
+                        className="w-12 h-12 rounded object-cover flex-shrink-0 border border-gray-600"
+                      />
+                    )}
+                    <div className="flex-1">
+                      <p className="text-white font-semibold">{m.fullName}</p>
+                      <p className="text-gray-400">
+                        Best confidence: {m.bestConfidence?.toFixed(1) ?? '0.0'}% • Hits: {m.hits ?? 0}
+                      </p>
+                      {m.position && (
+                        <p className="text-gray-500 mt-1">
+                          Likely location:{' '}
+                          <span className="text-blue-300 font-semibold">
+                            {m.position.charAt(0).toUpperCase() + m.position.slice(1)}
+                          </span>{' '}
+                          side of the frame.
+                        </p>
+                      )}
+                      <p className="text-gray-500">
+                        Matching report highlighted as{' '}
+                        <span className="text-yellow-300 font-semibold">Potential Match</span> in the list below.
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center bg-gray-900/50 rounded-lg py-16">
-              <Camera className="h-12 w-12 text-gray-500 mb-4" />
-              <p className="text-gray-400 mb-4">Camera is off</p>
-              <button
-                onClick={() => setCameraEnabled(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
-              >
-                <Camera className="h-4 w-4 mr-2" />
-                Start Camera
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* AI Analytics Dashboard */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative">
-          <button
-            onClick={handleResetStats}
-            className="absolute -top-2 -right-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs px-2 py-1 rounded z-10"
-            title="Reset Stats"
-          >
-            Reset Stats
-          </button>
-          <div className="bg-gradient-to-br from-blue-900/50 to-blue-800/30 rounded-xl p-6 border border-blue-700/20">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-blue-300">Face Scans</p>
-                <p className="text-2xl font-bold text-white">
-                  {aiScanResults.totalScans.toLocaleString()}
-                </p>
+        {/* RIGHT: Live Camera Preview + Analytics Dashboard stacked */}
+        <div className="space-y-4">
+          <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
+            <h3 className="text-sm text-gray-300 mb-2">Live Camera Preview</h3>
+            {cameraEnabled ? (
+              <div className="space-y-3">
+                <div className="relative">
+                  <Webcam
+                    ref={webcamRef}
+                    audio={false}
+                    screenshotFormat="image/jpeg"
+                    videoConstraints={videoConstraints}
+                    className="rounded-lg w-full"
+                  />
+                  {isScanning && (
+                    <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-lg text-xs flex items-center animate-pulse">
+                      <div className="w-2 h-2 bg-white rounded-full mr-2 animate-ping" />
+                      SCANNING
+                    </div>
+                  )}
+                  {detectedPersons > 0 && (
+                    <div className="absolute top-2 right-2 bg-green-600 text-white px-2 py-1 rounded-lg text-xs">
+                      {detectedPersons} person(s) detected
+                    </div>
+                  )}
+                </div>
+                
+                {/* Match Result Display */}
+                {matchResult && (
+                  <div className="bg-gradient-to-r from-green-900/80 to-green-800/80 border-2 border-green-500 rounded-lg p-4 animate-pulse">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <CheckCircle className="h-8 w-8 text-green-400" />
+                        <div>
+                          <p className="text-green-300 text-sm font-medium">MATCH FOUND!</p>
+                          <p className="text-white text-lg font-bold">{matchResult.name}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-green-300 text-sm">Confidence</p>
+                        <p className="text-3xl font-bold text-white">{matchResult.confidence}%</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setMatchResult(null)}
+                      className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded text-sm"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
+
+                {/* Scan Status */}
+                {scanStatus && !matchResult && (
+                  <div className={`text-sm px-3 py-2 rounded-lg ${
+                    scanStatus.includes('MATCH FOUND') 
+                      ? 'bg-green-900/50 text-green-300 font-bold' 
+                      : scanStatus.includes('error') || scanStatus.includes('not available')
+                      ? 'bg-red-900/50 text-red-300'
+                      : 'bg-blue-900/50 text-blue-300'
+                  }`}>
+                    {scanStatus}
+                  </div>
+                )}
+                
+                <div className="flex gap-2">
+                  {!isScanning ? (
+                    <button
+                      onClick={startScanning}
+                      className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-2 px-4 rounded-lg transition-all flex items-center justify-center"
+                    >
+                      <Zap className="h-4 w-4 mr-2" />
+                      Start Scan
+                    </button>
+                  ) : (
+                    <button
+                      onClick={stopScanning}
+                      className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2 px-4 rounded-lg transition-all flex items-center justify-center"
+                    >
+                      <StopCircle className="h-4 w-4 mr-2" />
+                      Stop Scan
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      stopScanning();
+                      setCameraEnabled(false);
+                    }}
+                    className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
-              <Eye className="h-8 w-8 text-blue-400" />
-            </div>
-            <div className="text-sm text-blue-300">Frames analyzed</div>
+            ) : (
+              <div className="flex flex-col items-center justify-center bg-gray-900/50 rounded-lg py-16">
+                <Camera className="h-12 w-12 text-gray-500 mb-4" />
+                <p className="text-gray-400 mb-4">Camera is off</p>
+                <button
+                  onClick={() => setCameraEnabled(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
+                >
+                  <Camera className="h-4 w-4 mr-2" />
+                  Start Camera
+                </button>
+              </div>
+            )}
           </div>
 
-          <div className="bg-gradient-to-br from-green-900/50 to-green-800/30 rounded-xl p-6 border border-green-700/20">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-green-300">Success Rate</p>
-                <p className="text-2xl font-bold text-white">
-                  {Math.round(aiScanResults.successRate * 100)}%
-                </p>
+          {/* Analytics Dashboard (now under Live Camera) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative items-start">
+            <button
+              onClick={handleResetStats}
+              className="absolute -top-2 -right-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs px-2 py-1 rounded z-10"
+              title="Reset Stats"
+            >
+              Reset Stats
+            </button>
+            <div className="bg-gradient-to-br from-blue-900/50 to-blue-800/30 rounded-xl px-4 py-5 border border-blue-700/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-blue-300">Face Scans</p>
+                  <p className="text-2xl font-bold text-white">
+                    {aiScanResults.totalScans.toLocaleString()}
+                  </p>
+                </div>
+                <Eye className="h-8 w-8 text-blue-400" />
               </div>
-              <Zap className="h-8 w-8 text-green-400" />
+              <div className="text-sm text-blue-300">Frames analyzed</div>
             </div>
-            <div className="text-sm text-green-300">Accuracy</div>
-          </div>
 
-          <div className="bg-gradient-to-br from-yellow-900/50 to-yellow-800/30 rounded-xl p-6 border border-yellow-700/20">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-yellow-300">Active Cases</p>
-                <p className="text-2xl font-bold text-white">
-                  {missingPersons.filter((p) => p.status !== 'found').length}
-                </p>
+            <div className="bg-gradient-to-br from-green-900/50 to-green-800/30 rounded-xl px-4 py-5 border border-green-700/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-green-300">Success Rate</p>
+                  <p className="text-2xl font-bold text-white">
+                    {Math.round(aiScanResults.successRate * 100)}%
+                  </p>
+                </div>
+                <Zap className="h-8 w-8 text-green-400" />
               </div>
-              <Search className="h-8 w-8 text-yellow-400" />
+              <div className="text-sm text-green-300">Accuracy</div>
             </div>
-            <div className="text-sm text-yellow-300">Currently searching</div>
+
+            <div className="bg-gradient-to-br from-yellow-900/50 to-yellow-800/30 rounded-xl px-4 py-5 border border-yellow-700/20">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-yellow-300">Active Cases</p>
+                  <p className="text-2xl font-bold text-white">
+                    {missingPersons.filter((p) => p.status !== 'found').length}
+                  </p>
+                </div>
+                <Search className="h-8 w-8 text-yellow-400" />
+              </div>
+              <div className="text-sm text-yellow-300">Currently searching</div>
+            </div>
           </div>
         </div>
       </div>

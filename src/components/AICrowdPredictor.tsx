@@ -172,19 +172,33 @@ class SurgeDetector {
   }
 
   getRiskLevel(data: number[]): 'low' | 'medium' | 'high' {
-    if (data.length < 3) return 'low';
+    if (data.length === 0) return 'low';
 
-    const recent = data.slice(-3);
-    const older = data.slice(-6, -3);
+    const currentCount = data[data.length - 1];
+    
+    // Absolute risk based on total attendees
+    // High risk: 5000+ attendees
+    // Medium risk: 2000-4999 attendees
+    // Low risk: <2000 attendees
+    if (currentCount >= 5000) return 'high';
+    if (currentCount >= 2000) return 'medium';
+    
+    // If we have historical data, also consider surge rate
+    if (data.length >= 3) {
+      const recent = data.slice(-3);
+      const older = data.slice(-6, -3);
 
-    if (older.length === 0) return 'low';
+      if (older.length > 0) {
+        const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+        const olderAvg = older.reduce((a, b) => a + b, 0) / older.length;
+        const ratio = recentAvg / (olderAvg || 1);
 
-    const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
-    const olderAvg = older.reduce((a, b) => a + b, 0) / older.length;
-    const ratio = recentAvg / (olderAvg || 1);
-
-    if (ratio > 1.8) return 'high';
-    if (ratio > 1.3) return 'medium';
+        // If there's a rapid surge, upgrade risk level
+        if (ratio > 1.8 && currentCount >= 1000) return 'high';
+        if (ratio > 1.3 && currentCount >= 500) return 'medium';
+      }
+    }
+    
     return 'low';
   }
 }
@@ -277,6 +291,17 @@ const AICrowdPredictor: React.FC = () => {
               clusters: centroids.sort((a, b) => a - b),
               accuracy: Math.max(0, 100 - Math.abs(params.slope) * 2)
             });
+          } else if (updated.length > 0) {
+            // Even with limited data, calculate risk based on current count
+            const counts = updated.map(d => d.count);
+            const risk = mlModels.surgeDetector.getRiskLevel(counts);
+            setRiskLevel(risk);
+            
+            // Check for surge if we have at least 2 data points
+            if (updated.length >= 2) {
+              const isSurge = mlModels.surgeDetector.detect(counts);
+              setSurgeDetected(isSurge);
+            }
           }
 
           return updated;
