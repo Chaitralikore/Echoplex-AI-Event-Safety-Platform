@@ -315,6 +315,35 @@ router.post('/check-in/qr', async (req: Request, res: Response) => {
     });
   }
 });
+// DELETE: Clear all attendees for an event (useful before re-importing)
+router.delete('/clear/:eventId', async (req: Request, res: Response) => {
+  try {
+    const { eventId } = req.params;
+    
+    // Find and remove all attendees for this event
+    const toDelete: string[] = [];
+    attendees.forEach((attendee, id) => {
+      if (attendee.eventId === eventId) {
+        toDelete.push(id);
+      }
+    });
+    
+    toDelete.forEach(id => attendees.delete(id));
+    
+    return res.status(200).json({
+      success: true,
+      message: `Cleared ${toDelete.length} attendees for event ${eventId}`,
+      data: { deletedCount: toDelete.length }
+    });
+  } catch (error) {
+    console.error('Clear attendees error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
 // POST: Bulk import attendees from CSV
 router.post('/bulk-import', async (req: Request, res: Response) => {
   try {

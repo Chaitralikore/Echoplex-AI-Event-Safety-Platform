@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Download, Users, CheckCircle, XCircle, FileText } from 'lucide-react';
+import { Upload, Download, Users, CheckCircle, XCircle, FileText, Trash2 } from 'lucide-react';
 
 interface ImportResult {
   success: boolean;
@@ -14,10 +14,48 @@ interface ImportResult {
 const BulkImport: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [eventId] = useState('EVT-2024-001');
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+  // Clear all attendees before re-importing
+  const handleClearAttendees = async () => {
+    if (!confirm('Are you sure you want to clear ALL attendees? This action cannot be undone.')) {
+      return;
+    }
+
+    setClearing(true);
+    setResult(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/attendees/clear/${eventId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setResult({
+          success: true,
+          message: `Cleared ${data.data.deletedCount} attendees. You can now re-import.`,
+        });
+      } else {
+        setResult({
+          success: false,
+          message: data.message || 'Failed to clear attendees',
+        });
+      }
+    } catch (error: any) {
+      setResult({
+        success: false,
+        message: 'Failed to connect to server',
+      });
+    } finally {
+      setClearing(false);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -148,7 +186,7 @@ Sneha Chavan,sneha@example.com,+918361678954,TKT-005`;
           />
           <button
             onClick={handleUpload}
-            disabled={!file || loading}
+            disabled={!file || loading || clearing}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
           >
             {loading ? (
@@ -160,6 +198,24 @@ Sneha Chavan,sneha@example.com,+918361678954,TKT-005`;
               <>
                 <Upload className="w-5 h-5" />
                 Import Attendees
+              </>
+            )}
+          </button>
+          <button
+            onClick={handleClearAttendees}
+            disabled={loading || clearing}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
+            title="Clear all attendees before re-importing"
+          >
+            {clearing ? (
+              <>
+                <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
+                Clearing...
+              </>
+            ) : (
+              <>
+                <Trash2 className="w-5 h-5" />
+                Clear All
               </>
             )}
           </button>

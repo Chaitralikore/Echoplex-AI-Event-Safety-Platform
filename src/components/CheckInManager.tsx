@@ -1,6 +1,6 @@
 // src/components/CheckInManager.tsx
-import React, { useState } from 'react';
-import { UserCheck, UserX, Search, Clock, MapPin } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { UserCheck, UserX, Search, Clock, MapPin, Users, RefreshCw } from 'lucide-react';
 
 interface Attendee {
   id: string;
@@ -22,8 +22,34 @@ const CheckInManager: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [attendeeData, setAttendeeData] = useState<Attendee | null>(null);
+  const [checkedInList, setCheckedInList] = useState<Attendee[]>([]);
+  const [loadingList, setLoadingList] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+  // Fetch all checked-in attendees
+  const fetchCheckedInAttendees = async () => {
+    setLoadingList(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/attendees/checked-in/${eventId}`);
+      const data = await response.json();
+      if (data.success) {
+        setCheckedInList(data.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch checked-in list:', error);
+    } finally {
+      setLoadingList(false);
+    }
+  };
+
+  // Fetch list on mount and after each check-in/check-out
+  useEffect(() => {
+    fetchCheckedInAttendees();
+    // Auto-refresh every 10 seconds
+    const interval = setInterval(fetchCheckedInAttendees, 10000);
+    return () => clearInterval(interval);
+  }, [eventId]);
 
   const handleCheckIn = async () => {
     if (!ticketId.trim()) {
@@ -53,6 +79,8 @@ const CheckInManager: React.FC = () => {
         setMessage({ type: 'success', text: data.message });
         setAttendeeData(data.data.attendee);
         setTicketId('');
+        // Refresh the checked-in list
+        fetchCheckedInAttendees();
       } else {
         setMessage({ type: 'error', text: data.message });
       }
@@ -94,6 +122,8 @@ const CheckInManager: React.FC = () => {
         });
         setAttendeeData(data.data.attendee);
         setTicketId('');
+        // Refresh the checked-in list
+        fetchCheckedInAttendees();
       } else {
         setMessage({ type: 'error', text: data.message });
       }
@@ -103,6 +133,13 @@ const CheckInManager: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Quick check-out directly from the checked-in list
+  const handleRowCheckOut = async (ticketIdFromRow: string) => {
+    // Reuse existing logic but with the row's ticket ID
+    setTicketId(ticketIdFromRow);
+    await handleCheckOut();
   };
 
   const handleCheckStatus = async () => {
@@ -318,6 +355,83 @@ const CheckInManager: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* All Checked-In Attendees List */}
+      <div className="mt-6 bg-slate-700 rounded-lg border border-slate-600">
+        <div className="flex items-center justify-between p-4 border-b border-slate-600">
+          <div className="flex items-center gap-3">
+            <Users className="w-5 h-5 text-emerald-400" />
+            <h3 className="text-lg font-semibold text-white">
+              All Checked-In Attendees ({checkedInList.length})
+            </h3>
+          </div>
+          <button
+            onClick={fetchCheckedInAttendees}
+            disabled={loadingList}
+            className="flex items-center gap-2 px-3 py-1.5 bg-slate-600 hover:bg-slate-500 text-white rounded-lg text-sm transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 ${loadingList ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
+        
+        {checkedInList.length === 0 ? (
+          <div className="p-8 text-center text-slate-400">
+            <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
+            <p>No attendees checked in yet</p>
+          </div>
+        ) : (
+          <div className="max-h-96 overflow-y-auto">
+            <table className="w-full">
+              <thead className="bg-slate-800 sticky top-0">
+                <tr>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-300">Name</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-300">Ticket ID</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-300">Location</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-300">Check-In Time</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-300">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-600">
+                {checkedInList.map((attendee) => (
+                  <tr key={attendee.id} className="hover:bg-slate-600/50 transition-colors">
+                    <td className="px-4 py-3">
+                      <div>
+                        <p className="text-white font-medium">{attendee.name}</p>
+                        <p className="text-slate-400 text-xs">{attendee.email}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-cyan-400 font-mono text-sm">{attendee.ticketId}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1 text-slate-300 text-sm">
+                        <MapPin className="w-3 h-3 text-emerald-400" />
+                        {attendee.location || 'Unknown'}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-slate-300 text-sm">
+                      {attendee.checkInTime 
+                        ? new Date(attendee.checkInTime).toLocaleString()
+                        : 'N/A'
+                      }
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleRowCheckOut(attendee.ticketId)}
+                        disabled={loading || loadingList}
+                        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-cyan-500 hover:bg-cyan-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white transition-colors"
+                      >
+                        Check Out
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
