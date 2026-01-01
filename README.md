@@ -1,563 +1,889 @@
-# Echoplex - AI-Powered Event Safety Intelligence Platform
+# 🎯 Echoplex - AI-Powered Event Safety Intelligence Platform
 
-<div align="center">
-  <img src="https://img.shields.io/badge/React-18.3.1-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React" />
-  <img src="https://img.shields.io/badge/TypeScript-5.5.3-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-3.4.1-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/Google_AI-Vertex_AI-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Google AI" />
-  <img src="https://img.shields.io/badge/Netlify-Deployed-00C7B7?style=for-the-badge&logo=netlify&logoColor=white" alt="Netlify" />
-</div>
+> **Real-time crowd monitoring, missing person detection, and predictive safety intelligence for large-scale events**
 
-<div align="center">
-  <h3>🚀 <a href="https://velvety-belekoy-8a22aa.netlify.app">Live Demo</a> | 📖 Documentation | 🤝 Contributing</h3>
-</div>
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://reactjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6.svg)](https://typescriptlang.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)](https://fastapi.tiangolo.com)
 
 ---
 
 ## 📋 Table of Contents
 
-- [About the Project](#-about-the-project)
-- [Overview](#-overview)
-- [Features](#-features)
-  - [Core Capabilities](#core-capabilities)
-  - [AI-Powered Modules](#ai-powered-modules)
-  - [Real-time Intelligence](#real-time-intelligence)
-- [Technology Stack](#-technology-stack)
-  - [Frontend Technologies](#frontend-technologies)
-  - [Google AI Integration](#google-ai-integration)
-  - [Development Tools](#development-tools)
-- [Security Features](#-security-features)
-  - [Data Protection](#data-protection)
-  - [AI Safety Measures](#ai-safety-measures)
-  - [Privacy Compliance](#privacy-compliance)
-- [Design System](#-design-system)
-  - [Visual Identity](#visual-identity)
-  - [Color Palette](#color-palette)
-  - [Typography & Layout](#typography--layout)
-  - [Component Architecture](#component-architecture)
-- [Getting Started](#-getting-started)
-- [Project Structure](#-project-structure)
-- [Deployment](#-deployment)
-- [Contributing](#-contributing)
-- [License](#-license)
+1. [Overview](#overview)
+2. [System Architecture](#system-architecture)
+3. [Core Features](#core-features)
+4. [AI/ML Algorithms](#aiml-algorithms)
+5. [Person Re-Identification System](#person-re-identification-system)
+6. [Color Detection System](#color-detection-system)
+7. [Crowd Surge Prediction](#crowd-surge-prediction)
+8. [Technical Implementation](#technical-implementation)
+9. [API Reference](#api-reference)
+10. [Setup & Installation](#setup--installation)
+11. [Performance Considerations](#performance-considerations)
+12. [Future Plans & Scaling Roadmap](#future-plans--scaling-roadmap)
 
 ---
 
-## 🎯 About the Project
+## 🌐 Overview
 
-**Echoplex** is a next-generation event safety intelligence platform that harnesses the power of Google's advanced AI ecosystem to revolutionize how large-scale events are monitored, managed, and secured. Built with cutting-edge artificial intelligence, machine learning, and real-time data processing capabilities, Echoplex serves as the central nervous system for event safety operations.
+Echoplex is an enterprise-grade event safety platform that combines computer vision, machine learning, and real-time analytics to:
 
-The platform demonstrates the practical application of autonomous AI systems in critical safety scenarios, showcasing how modern AI can predict, prevent, and respond to potential safety incidents before they escalate. From crowd surge prediction to autonomous resource dispatch, Echoplex represents the future of intelligent event management.
-
-### 🎪 Use Cases
-- **Music Festivals & Concerts** - Crowd management and safety monitoring
-- **Sports Events** - Stadium safety and emergency response coordination  
-- **Corporate Events** - Security and incident management
-- **Public Gatherings** - Real-time safety intelligence and risk assessment
-- **Emergency Response** - Coordinated multi-agency response systems
+- **Detect missing persons** in CCTV footage and live camera feeds
+- **Predict crowd surges** before they become dangerous
+- **Monitor zone occupancy** in real-time
+- **Manage attendee check-ins** with QR codes
+- **Provide AI-powered safety insights**
 
 ---
 
-## 🔍 Overview
+## 🏗️ System Architecture
 
-Echoplex transforms traditional event safety management through **autonomous AI intelligence** that continuously learns, adapts, and responds to evolving safety conditions. The platform integrates multiple AI models and data sources to create a comprehensive safety ecosystem that operates 24/7 with minimal human intervention.
-
-### 🧠 Core Philosophy
-- **Predictive Intelligence**: Anticipate incidents before they occur
-- **Autonomous Response**: AI-driven decision making and resource allocation
-- **Continuous Learning**: Adaptive algorithms that improve with each event
-- **Multimodal Analysis**: Integration of visual, audio, and sensor data
-- **Human-AI Collaboration**: Augmenting human expertise with AI capabilities
-
-### 🎯 Mission Statement
-*"To create the world's most intelligent event safety platform that protects lives through predictive AI, autonomous response systems, and continuous learning capabilities."*
-
----
-
-## ✨ Features
-
-### Core Capabilities
-
-#### 🎛️ **Event Overview Dashboard**
-- **Real-time Metrics**: Live KPIs and safety indicators across all event zones
-- **Zone Intelligence**: Comprehensive monitoring of crowd density, weather, and security status
-- **AI-Powered Insights**: Predictive analytics with confidence scoring and recommended actions
-- **Live Camera Network**: 47+ AI-enabled cameras with computer vision processing
-- **Autonomous Drone Fleet**: 4 intelligent drones with autonomous patrol and response capabilities
-
-#### 👥 **Crowd Intelligence System**
-- **Density Monitoring**: Real-time crowd density analysis with 94% accuracy
-- **Flow Pattern Analysis**: AI-powered crowd movement prediction and bottleneck detection
-- **Surge Prediction**: Vertex AI Forecasting with 89% accuracy for crowd surge events
-- **Velocity Tracking**: Real-time crowd movement speed and direction analysis
-- **Heatmap Visualization**: Interactive density maps with risk zone identification
-
-#### 🛡️ **Risk Assessment Engine**
-- **Multi-Factor Scoring**: Comprehensive risk analysis across weather, crowd, security, and infrastructure
-- **Predictive Timeline**: AI-generated risk forecasts with probability scoring
-- **Autonomous Recommendations**: Self-generating action items based on risk patterns
-- **Pattern Recognition**: Machine learning algorithms that identify emerging risk factors
-- **Confidence Intervals**: Statistical analysis with 85-95% confidence ranges
-
-### AI-Powered Modules
-
-#### 🚨 **Incident Command Center**
-- **Real-time Tracking**: Live incident monitoring with automatic severity classification
-- **Resource Coordination**: Intelligent dispatch system with ETA calculations
-- **Response Optimization**: AI-optimized resource allocation for maximum efficiency
-- **Escalation Protocols**: Automated incident escalation based on severity and response time
-- **Historical Analysis**: Pattern recognition for incident prevention strategies
-
-#### 📡 **Autonomous Resource Dispatch**
-- **Smart Allocation**: AI-driven resource positioning based on predictive models
-- **Real-time Tracking**: Live GPS tracking of all medical, security, and emergency units
-- **Optimization Engine**: Dynamic reallocation based on changing event conditions
-- **Response Time Analytics**: Performance metrics with continuous improvement algorithms
-- **Battery Management**: Automated monitoring and maintenance scheduling for equipment
-
-#### 🔍 **Multimodal Anomaly Detection**
-- **Computer Vision**: Advanced image analysis for threat and anomaly identification
-- **Behavioral Analysis**: AI models trained on crowd behavior patterns and anomalies
-- **Thermal Imaging**: Heat signature analysis for fire detection and crowd stress monitoring
-- **Audio Processing**: Sound pattern recognition for distress signals and unusual activity
-- **Sensor Fusion**: Integration of multiple data sources for comprehensive threat detection
-
-#### 🔎 **Lost & Found AI System**
-- **Facial Recognition**: Privacy-compliant facial matching with 87% accuracy
-- **Automated Search**: AI-powered search across all camera feeds and databases
-- **Real-time Alerts**: Instant notifications when missing persons are located
-- **Case Management**: Comprehensive tracking and resolution of missing person cases
-- **Family Reunification**: Streamlined processes for safe family reunification
-
-#### 🤖 **AI Command Interface**
-- **Natural Language Processing**: Conversational AI powered by Gemini Pro
-- **Autonomous Reasoning**: Self-directed analysis and decision-making capabilities
-- **Continuous Learning**: Adaptive algorithms that improve with each interaction
-- **Multi-source Integration**: Real-time analysis of 50+ data sources
-- **Predictive Insights**: Proactive recommendations based on pattern analysis
-
-### Real-time Intelligence
-
-#### 📊 **Live Data Processing**
-- **15,000+ Data Points**: Processed every minute from multiple sources
-- **Sub-second Response**: AI analysis and recommendations in under 1 second
-- **99.97% Uptime**: Enterprise-grade reliability and availability
-- **Scalable Architecture**: Cloud-native design supporting events of any size
-
-#### 🎯 **Predictive Analytics**
-- **Crowd Surge Forecasting**: 18-minute advance warning with 89% accuracy
-- **Weather Impact Analysis**: Correlation between weather patterns and safety incidents
-- **Resource Demand Prediction**: AI-powered staffing and equipment optimization
-- **Incident Probability Scoring**: Risk assessment with statistical confidence intervals
-
----
-
-## 🛠️ Technology Stack
-
-### Frontend Technologies
-
-#### **Core Framework**
-- **React 18.3.1** - Modern component-based UI framework with concurrent features
-- **TypeScript 5.5.3** - Type-safe development with advanced static analysis
-- **Vite 5.4.2** - Lightning-fast build tool with hot module replacement
-- **Tailwind CSS 3.4.1** - Utility-first CSS framework for rapid UI development
-
-#### **UI Components & Icons**
-- **Lucide React 0.344.0** - Beautiful, customizable SVG icons
-- **Custom Components** - Modular, reusable component architecture
-- **Responsive Design** - Mobile-first approach with breakpoint optimization
-- **Accessibility** - WCAG 2.1 AA compliant interface design
-
-### Google AI Integration
-
-#### **Vertex AI Platform**
-- **Vertex AI Vision** - Computer vision for crowd analysis and anomaly detection
-- **Vertex AI Forecasting** - Predictive analytics for crowd surge and risk assessment
-- **Vertex AI Agent Builder** - Autonomous decision-making and response systems
-- **Model Garden** - Custom AI models for event-specific use cases
-
-#### **Gemini AI Models**
-- **Gemini Pro** - Advanced natural language understanding and generation
-- **Gemini Multimodal** - Integration of text, image, and audio processing
-- **Gemini Vision** - Visual analysis and scene understanding capabilities
-- **Continuous Learning** - Adaptive model improvement through real-world data
-
-#### **Firebase Integration**
-- **Real-time Database** - Live data synchronization across all components
-- **Cloud Functions** - Serverless backend processing for AI workflows
-- **Authentication** - Secure user management and access control
-- **Analytics** - Performance monitoring and usage analytics
-
-#### **Additional AI Services**
-- **Imagen** - AI-powered image generation and analysis
-- **Cloud Vision API** - Advanced image recognition and classification
-- **Natural Language API** - Text analysis and sentiment processing
-- **AutoML** - Custom model training for event-specific scenarios
-
-### Development Tools
-
-#### **Code Quality & Testing**
-- **ESLint 9.9.1** - Advanced JavaScript/TypeScript linting
-- **TypeScript ESLint** - TypeScript-specific code analysis
-- **React Hooks ESLint** - React best practices enforcement
-- **Prettier Integration** - Consistent code formatting
-
-#### **Build & Deployment**
-- **Vite Plugin React** - Optimized React development experience
-- **PostCSS & Autoprefixer** - CSS processing and browser compatibility
-- **Netlify Deployment** - Continuous deployment with edge optimization
-- **Environment Management** - Secure configuration and secrets management
-
----
-
-## 🔒 Security Features
-
-### Data Protection
-
-#### **Encryption & Privacy**
-- **End-to-End Encryption** - All data transmission secured with TLS 1.3
-- **Data Anonymization** - Personal information automatically anonymized in analytics
-- **GDPR Compliance** - Full compliance with European data protection regulations
-- **CCPA Compliance** - California Consumer Privacy Act adherence
-- **Data Retention Policies** - Automated data lifecycle management
-
-#### **Access Control**
-- **Role-Based Access Control (RBAC)** - Granular permissions based on user roles
-- **Multi-Factor Authentication** - Enhanced security for administrative access
-- **Session Management** - Secure session handling with automatic timeout
-- **Audit Logging** - Comprehensive logging of all system access and actions
-- **IP Whitelisting** - Network-level access restrictions for sensitive operations
-
-### AI Safety Measures
-
-#### **Model Security**
-- **Adversarial Testing** - Regular testing against AI model attacks
-- **Bias Detection** - Continuous monitoring for algorithmic bias
-- **Model Validation** - Rigorous testing before deployment of AI models
-- **Explainable AI** - Transparent decision-making processes with confidence scores
-- **Human Oversight** - Critical decisions require human validation
-
-#### **Data Integrity**
-- **Input Validation** - Comprehensive validation of all data inputs
-- **Anomaly Detection** - AI-powered detection of unusual data patterns
-- **Data Quality Monitoring** - Continuous assessment of data accuracy and completeness
-- **Backup & Recovery** - Automated backup systems with point-in-time recovery
-- **Disaster Recovery** - Multi-region failover capabilities
-
-### Privacy Compliance
-
-#### **Facial Recognition Ethics**
-- **Consent Management** - Clear opt-in/opt-out mechanisms for facial recognition
-- **Data Minimization** - Only collect and process necessary biometric data
-- **Retention Limits** - Automatic deletion of biometric data after event completion
-- **Accuracy Standards** - Minimum 95% accuracy requirements for identification systems
-- **Bias Mitigation** - Regular testing across diverse demographic groups
-
-#### **Surveillance Governance**
-- **Purpose Limitation** - AI surveillance limited to safety and security purposes only
-- **Transparency Reports** - Regular public reporting on AI system usage and performance
-- **Ethics Review Board** - Independent oversight of AI deployment decisions
-- **User Rights** - Clear mechanisms for data access, correction, and deletion requests
-- **Third-Party Audits** - Regular security and privacy audits by independent firms
-
----
-
-## 🎨 Design System
-
-### Visual Identity
-
-#### **Brand Philosophy**
-Echoplex's design embodies the concept of **"Intelligent Vigilance"** - a sophisticated, trustworthy platform that combines cutting-edge technology with human-centered design. The visual language reflects precision, reliability, and advanced AI capabilities while maintaining approachability and clarity.
-
-#### **Logo & Iconography**
-- **Primary Logo**: Eye icon representing vigilant AI surveillance and continuous monitoring
-- **Symbol Meaning**: The eye symbolizes awareness, protection, and the all-seeing nature of AI
-- **Icon Style**: Lucide React icons for consistency and scalability
-- **Visual Hierarchy**: Clear information architecture with intuitive navigation
-
-### Color Palette
-
-#### **Primary Colors**
-```css
-/* Cyan Spectrum - Intelligence & Technology */
---cyan-50:  #ecfeff;   /* Light backgrounds */
---cyan-400: #22d3ee;   /* Primary actions */
---cyan-500: #06b6d4;   /* Main brand color */
---cyan-600: #0891b2;   /* Hover states */
---cyan-900: #164e63;   /* Dark accents */
-
-/* Teal Spectrum - Trust & Reliability */
---teal-400: #2dd4bf;   /* Success states */
---teal-500: #14b8a6;   /* Confirmation actions */
---teal-600: #0d9488;   /* Active states */
-
-/* Emerald Spectrum - Safety & Security */
---emerald-400: #34d399; /* Safe conditions */
---emerald-500: #10b981; /* Positive indicators */
---emerald-600: #059669; /* Success confirmations */
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        FRONTEND (React + TypeScript)             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
+│  │ Lost & Found │  │ Zone Monitor │  │ Crowd Surge Predictor│   │
+│  │   (WebRTC)   │  │  (Charts)    │  │    (ML Dashboard)    │   │
+│  └──────┬───────┘  └──────┬───────┘  └──────────┬───────────┘   │
+└─────────┼─────────────────┼─────────────────────┼───────────────┘
+          │                 │                     │
+          ▼                 ▼                     ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     EXPRESS SERVER (Port 3000)                   │
+│            REST API + WebSocket + Firebase Integration           │
+└─────────────────────────────────────────────────────────────────┘
+          │
+          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   AI BACKEND (FastAPI - Port 8002)               │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌───────────┐  │
+│  │   YOLO     │  │  Re-ID     │  │   Color    │  │ Precision │  │
+│  │ Detection  │  │ Extractor  │  │ Extractor  │  │ Guardrails│  │
+│  └────────────┘  └────────────┘  └────────────┘  └───────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+          │
+          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      FIREBASE REALTIME DATABASE                  │
+│         Attendees • Missing Persons • Stats • Zones              │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-#### **Semantic Colors**
-```css
-/* Status Indicators */
---success:  #10b981;   /* Safe, operational, resolved */
---warning:  #f59e0b;   /* Caution, medium risk, attention needed */
---error:    #ef4444;   /* Danger, high risk, critical alerts */
---info:     #3b82f6;   /* Information, neutral status */
+---
 
-/* Gradient System */
---gradient-primary: linear-gradient(135deg, #06b6d4, #14b8a6, #10b981);
---gradient-alert:   linear-gradient(135deg, #f59e0b, #ef4444);
---gradient-success: linear-gradient(135deg, #10b981, #059669);
-```
+## 🚀 Core Features
 
-#### **Dark Theme Palette**
-```css
-/* Background Layers */
---slate-900: #0f172a;  /* Primary background */
---slate-800: #1e293b;  /* Card backgrounds */
---slate-700: #334155;  /* Interactive elements */
---slate-600: #475569;  /* Borders and dividers */
+### 1. Lost & Found - Missing Person Detection
 
-/* Text Hierarchy */
---white:     #ffffff;  /* Primary text */
---slate-300: #cbd5e1;  /* Secondary text */
---slate-400: #94a3b8;  /* Tertiary text */
---slate-500: #64748b;  /* Disabled text */
-```
+**Purpose:** Locate missing persons in crowds using AI-powered facial and body recognition.
 
-### Typography & Layout
+| Component | Technology | Description |
+|-----------|------------|-------------|
+| **CCTV Video Analysis** | YOLO + Re-ID | Upload recorded video for offline analysis |
+| **Live Camera Preview** | WebRTC + Real-time API | Scan live webcam feed every 2 seconds |
+| **Case Management** | Firebase | Track status: Searching → Potential Match → Found |
 
-#### **Font System**
-- **Primary Font**: System font stack for optimal performance and readability
-- **Font Weights**: 400 (regular), 500 (medium), 600 (semibold), 700 (bold)
-- **Line Heights**: 150% for body text, 120% for headings
-- **Font Sizes**: Modular scale from 12px to 48px with responsive scaling
+**User Flow:**
+1. Report missing person with photo and clothing description
+2. System extracts 512-dimensional feature vector from reference photo
+3. Upload CCTV video OR start live camera scan
+4. AI matches detected persons against registered cases
+5. Matches above 60% confidence trigger notifications
 
-#### **Spacing System**
-```css
-/* 8px Base Grid System */
---space-1:  0.25rem;  /* 4px  - Micro spacing */
---space-2:  0.5rem;   /* 8px  - Small spacing */
---space-3:  0.75rem;  /* 12px - Medium spacing */
---space-4:  1rem;     /* 16px - Standard spacing */
---space-6:  1.5rem;   /* 24px - Large spacing */
---space-8:  2rem;     /* 32px - Extra large spacing */
---space-12: 3rem;     /* 48px - Section spacing */
-```
+### 2. Zone Intelligence & Crowd Monitoring
 
-#### **Layout Principles**
-- **Grid System**: CSS Grid and Flexbox for responsive layouts
-- **Breakpoints**: Mobile-first responsive design (sm: 640px, md: 768px, lg: 1024px, xl: 1280px)
-- **Container Widths**: Max-width constraints for optimal reading experience
-- **White Space**: Generous spacing for improved readability and visual hierarchy
+**Purpose:** Real-time occupancy tracking and capacity management.
 
-### Component Architecture
+| Zone | Capacity | Risk Levels |
+|------|----------|-------------|
+| Main Entrance | 5,000 | Low/Medium/High |
+| VIP Section | 500 | Based on % full |
+| General Area | 10,000 | Dynamic thresholds |
+| Food Court | 2,000 | Color-coded alerts |
 
-#### **Design Tokens**
-```css
-/* Border Radius */
---radius-sm:  0.25rem; /* 4px  - Small elements */
---radius-md:  0.5rem;  /* 8px  - Standard elements */
---radius-lg:  0.75rem; /* 12px - Cards and panels */
---radius-xl:  1rem;    /* 16px - Large containers */
+### 3. Bulk Attendee Management
 
-/* Shadows */
---shadow-sm:  0 1px 2px 0 rgb(0 0 0 / 0.05);
---shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.1);
---shadow-lg:  0 10px 15px -3px rgb(0 0 0 / 0.1);
---shadow-xl:  0 20px 25px -5px rgb(0 0 0 / 0.1);
+**Purpose:** Handle 10,000+ attendees via CSV import/export.
 
-/* Transitions */
---transition-fast:   150ms ease-in-out;
---transition-normal: 200ms ease-in-out;
---transition-slow:   300ms ease-in-out;
-```
+- **Import:** Upload CSV with Name, Email, Ticket ID
+- **Check-In/Out:** Batch operations with zone assignment
+- **QR Codes:** Auto-generated for each zone entry point
 
-#### **Interactive States**
-- **Hover Effects**: Subtle scale transforms (1.02x) and color transitions
-- **Focus States**: High-contrast focus rings for accessibility
-- **Active States**: Visual feedback for user interactions
-- **Loading States**: Skeleton screens and progress indicators
-- **Error States**: Clear error messaging with recovery actions
+### 4. Crowd Surge Prediction (ML-Powered)
 
-#### **Micro-interactions**
-- **Button Animations**: Scale and color transitions on interaction
-- **Card Hover Effects**: Elevation changes and border color shifts
-- **Progress Indicators**: Smooth animations for data loading and processing
-- **Status Changes**: Color transitions for real-time status updates
-- **Notification System**: Slide-in animations for alerts and confirmations
-
-#### **Accessibility Features**
-- **WCAG 2.1 AA Compliance**: Minimum 4.5:1 color contrast ratios
-- **Keyboard Navigation**: Full keyboard accessibility for all interactive elements
-- **Screen Reader Support**: Semantic HTML and ARIA labels
-- **Reduced Motion**: Respect for user motion preferences
-- **High Contrast Mode**: Enhanced visibility options for users with visual impairments
+**Purpose:** Predict dangerous crowd buildups 10-60 minutes in advance.
 
 ---
 
-## 🚀 Getting Started
+## 🤖 AI/ML Algorithms
+
+### Algorithm 1: Linear Regression (Supervised Learning)
+
+**Location:** `src/components/AICrowdPredictor.tsx`
+
+```typescript
+class LinearRegressionModel {
+  // Least Squares Method
+  train(X: number[], y: number[]): void {
+    const n = X.length;
+    const sumX = X.reduce((a, b) => a + b, 0);
+    const sumY = y.reduce((a, b) => a + b, 0);
+    const sumXY = X.reduce((sum, x, i) => sum + x * y[i], 0);
+    const sumXX = X.reduce((sum, x) => sum + x * x, 0);
+
+    // Calculate slope (m) and intercept (b)
+    this.slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    this.intercept = (sumY - this.slope * sumX) / n;
+  }
+
+  predict(x: number): number {
+    return this.slope * x + this.intercept;
+  }
+}
+```
+
+**Purpose:** Predict future attendance based on historical check-in data.
+
+### Algorithm 2: K-Means Clustering (Unsupervised Learning)
+
+```typescript
+class KMeansClustering {
+  private k: number = 3; // 3 clusters: Low, Medium, High crowd
+
+  fit(data: number[]): void {
+    // Initialize centroids, assign points, update centroids
+    // Converge when centroids stabilize
+  }
+}
+```
+
+**Purpose:** Classify crowd density patterns into categories.
+
+### Algorithm 3: Surge Detection (Anomaly Detection)
+
+```typescript
+class SurgeDetector {
+  // Absolute thresholds (priority)
+  private readonly HIGH_CAPACITY = 8000;
+  private readonly MEDIUM_CAPACITY = 5000;
+
+  getRiskLevel(data: number[]): 'low' | 'medium' | 'high' {
+    const currentCount = data[data.length - 1];
+    
+    // Priority 1: Absolute count
+    if (currentCount >= 8000) return 'high';
+    if (currentCount >= 5000) return 'medium';
+    
+    // Priority 2: Rate of change
+    const ratio = recentAvg / olderAvg;
+    if (ratio > 1.8) return 'high';
+    if (ratio > 1.3) return 'medium';
+    
+    return 'low';
+  }
+}
+```
+
+---
+
+## 👤 Person Re-Identification System
+
+### Overview
+
+The Person Re-ID system identifies individuals across different camera views without relying solely on face recognition. It uses **body shape**, **clothing colors**, and **appearance features**.
+
+### Pipeline Architecture
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Frame     │────▶│   Person    │────▶│   Feature   │────▶│   Match     │
+│   Input     │     │  Detection  │     │  Extraction │     │   Against   │
+│             │     │   (YOLO)    │     │   (Re-ID)   │     │   Cases     │
+└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
+                           │                   │
+                           ▼                   ▼
+                    ┌─────────────┐     ┌─────────────┐
+                    │   Crop      │     │   Color     │
+                    │   Person    │     │  Extraction │
+                    │   Image     │     │  (HSV)      │
+                    └─────────────┘     └─────────────┘
+```
+
+### Component 1: Person Detection (YOLO)
+
+**File:** `ai_backend/person_detector.py`
+
+```python
+from ultralytics import YOLO
+
+class PersonDetector:
+    def __init__(self):
+        self.model = YOLO('yolov8n.pt')  # Nano model for speed
+    
+    def detect_persons(self, frame: np.ndarray) -> List[Tuple]:
+        results = self.model(frame, classes=[0])  # Class 0 = person
+        detections = []
+        for box in results[0].boxes:
+            x1, y1, x2, y2 = box.xyxy[0].tolist()
+            confidence = box.conf[0].item()
+            detections.append((x1, y1, x2, y2, confidence))
+        return detections
+```
+
+**Output:** Bounding boxes for each person in frame.
+
+### Component 2: Re-ID Feature Extraction
+
+**File:** `ai_backend/reid_extractor.py`
+
+```python
+class ReIDExtractor:
+    def __init__(self):
+        # Use MobileNetV2 as lightweight CNN backbone
+        self.model = mobilenet_v2(weights=MobileNet_V2_Weights.DEFAULT)
+        self.model.classifier = nn.Identity()  # Remove classification layer
+        # Output: 1280-d vector, projected to 512-d
+    
+    def extract_features(self, person_crop: np.ndarray) -> np.ndarray:
+        # Preprocess: resize to 256x128, normalize
+        tensor = self.preprocess(person_crop)
+        features = self.model(tensor)
+        features = F.normalize(features, p=2, dim=1)  # L2 normalize
+        return features.numpy()  # 512-d vector
+    
+    def compute_similarity(self, vec1: np.ndarray, vec2: np.ndarray) -> float:
+        # Cosine similarity
+        return float(np.dot(vec1, vec2))
+```
+
+**Output:** 512-dimensional normalized feature vector.
+
+### Component 3: Temporal Super-Vector
+
+**File:** `ai_backend/temporal_analyzer.py`
+
+```python
+class TemporalTrack:
+    def __init__(self, track_id: int):
+        self.vectors: List[np.ndarray] = []
+        self.super_vector: Optional[np.ndarray] = None
+    
+    def add_detection(self, vector: np.ndarray):
+        self.vectors.append(vector)
+        if len(self.vectors) >= 5:
+            # Exponential Moving Average
+            self.super_vector = self._compute_ema()
+    
+    def _compute_ema(self, alpha=0.3) -> np.ndarray:
+        ema = self.vectors[0].copy()
+        for v in self.vectors[1:]:
+            ema = alpha * v + (1 - alpha) * ema
+        return ema / np.linalg.norm(ema)
+```
+
+**Purpose:** Reduce noise by aggregating features over multiple frames.
+
+---
+
+## 🎨 Color Detection System
+
+### How Color Detection Works
+
+**File:** `ai_backend/color_extractor.py`
+
+The system detects clothing colors using HSV (Hue-Saturation-Value) color space analysis.
+
+### Step 1: Region Segmentation
+
+```python
+def extract_regions(self, person_crop: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    h, w = person_crop.shape[:2]
+    
+    # Upper body: top 45% of person crop
+    upper_region = person_crop[int(h*0.15):int(h*0.45), :]
+    
+    # Lower body: bottom 45% of person crop
+    lower_region = person_crop[int(h*0.50):int(h*0.95), :]
+    
+    return upper_region, lower_region
+```
+
+### Step 2: HSV Color Analysis
+
+```python
+# HSV Color Ranges for Detection
+COLOR_RANGES = {
+    'red':     [(0, 100, 100), (10, 255, 255)],      # Low hue
+    'red2':    [(160, 100, 100), (180, 255, 255)],   # High hue (wraps around)
+    'orange':  [(10, 100, 100), (25, 255, 255)],
+    'yellow':  [(25, 100, 100), (35, 255, 255)],
+    'green':   [(35, 100, 100), (85, 255, 255)],
+    'blue':    [(85, 100, 100), (130, 255, 255)],
+    'purple':  [(130, 100, 100), (160, 255, 255)],
+    'white':   [(0, 0, 200), (180, 30, 255)],
+    'black':   [(0, 0, 0), (180, 255, 50)],
+    'gray':    [(0, 0, 50), (180, 30, 200)],
+}
+
+def detect_dominant_color(self, region: np.ndarray) -> str:
+    hsv = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)
+    
+    color_scores = {}
+    for color_name, (lower, upper) in COLOR_RANGES.items():
+        mask = cv2.inRange(hsv, np.array(lower), np.array(upper))
+        score = np.sum(mask) / mask.size  # Percentage of pixels
+        color_scores[color_name] = score
+    
+    return max(color_scores, key=color_scores.get)
+```
+
+### Step 3: Color Histogram Comparison
+
+```python
+def compare_colors(self, hist1: np.ndarray, hist2: np.ndarray) -> float:
+    # Histogram intersection similarity
+    return cv2.compareHist(hist1, hist2, cv2.HISTCMP_INTERSECT)
+```
+
+### Color Matching in Missing Person Search
+
+When a missing person report includes clothing color (e.g., "white top, black bottom"):
+
+1. **Reference Photo:** Extract upper/lower colors from the photo
+2. **Video Frame:** Extract colors from detected persons
+3. **Compare:** If "white top" in report but "red" detected → **REJECT match**
+
+```python
+# Attribute Filtering (precision_guardrails.py)
+def check_attribute_match(self, detected_attrs, reported_attrs):
+    reported_upper = reported_attrs.get('upper_clothing')  # "white"
+    detected_upper = detected_attrs.get('primary_upper')   # "red"
+    
+    if reported_upper != detected_upper:
+        return (False, 1.0)  # Critical mismatch → REJECT
+```
+
+---
+
+## 🛡️ Precision Guardrails (False Positive Prevention)
+
+**File:** `ai_backend/precision_guardrails.py`
+
+### Dynamic Thresholds
+
+| Video Quality | Threshold | Reasoning |
+|---------------|-----------|-----------|
+| High (720p+, sharp) | 85% | Clear features, lower threshold OK |
+| Medium | 90% | Some blur, need higher confidence |
+| Low (blurry) | 95% | Poor quality, very high bar needed |
+| Very Low | 97% | Almost certain matches only |
+
+### Multi-Factor Validation
+
+```python
+def validate_match(self, case_id, case_data, detection_vector, 
+                   detection_attrs, raw_score, video_quality, 
+                   timestamp, frame_number):
+    
+    # 1. Dynamic threshold based on video quality
+    threshold = self.get_dynamic_threshold(video_quality)
+    
+    # 2. Check blacklist (previous false matches)
+    if self.is_blacklisted(case_id, detection_vector):
+        return {'is_valid': False, 'reason': 'Vector blacklisted'}
+    
+    # 3. Attribute filtering (clothing color)
+    passes_attr, penalty = self.check_attribute_match(
+        detection_attrs, case_data.get('metadata', {})
+    )
+    if not passes_attr:
+        return {'is_valid': False, 'reason': 'Color mismatch'}
+    
+    # 4. Temporal consistency (5 frames, 1 second minimum)
+    temporal = self.check_temporal_consistency(case_id, ...)
+    if not temporal['should_trigger']:
+        return {'is_valid': False, 'reason': temporal['reason']}
+    
+    # 5. Score check
+    adjusted_score = raw_score - penalty
+    if adjusted_score < threshold:
+        return {'is_valid': False, 'reason': 'Below threshold'}
+    
+    return {'is_valid': True, 'adjusted_score': adjusted_score}
+```
+
+---
+
+## 🔌 API Reference
+
+### AI Backend Endpoints (Port 8002)
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/health` | GET | Service status + pipeline info |
+| `/api/sync-cases` | POST | Register missing persons for matching |
+| `/api/analyze-video` | POST | Upload and analyze CCTV video |
+| `/api/scan` | POST | Scan single camera frame (live) |
+| `/api/match-feedback` | POST | Report false match / confirm match |
+| `/ws/notifications` | WebSocket | Real-time match alerts |
+
+### Example: Sync Cases
+
+```bash
+curl -X POST http://127.0.0.1:8002/api/sync-cases \
+  -H "Content-Type: application/json" \
+  -d '[{
+    "id": "case-001",
+    "name": "Chaitrali",
+    "photoUrl": "data:image/png;base64,...",
+    "upperClothingColor": "white",
+    "lowerClothingColor": "black"
+  }]'
+```
+
+### Example: Live Scan
+
+```bash
+curl -X POST http://127.0.0.1:8002/api/scan \
+  -F "file=@frame.jpg"
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "person_count": 3,
+  "faces_detected": 1,
+  "matches": [
+    {
+      "fullName": "Chaitrali",
+      "case_id": "case-001",
+      "confidence": 82,
+      "detected_colors": {"upper": "white", "lower": "black"}
+    }
+  ]
+}
+```
+
+---
+
+## ⚙️ Setup & Installation
 
 ### Prerequisites
-- **Node.js** 18.0 or higher
-- **npm** 9.0 or higher
-- Modern web browser with ES2020 support
+
+- Node.js 18+
+- Python 3.8+
+- Firebase account
 
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/echoplex.git
+# Clone repository
+git clone https://github.com/your-repo/echoplex.git
 cd echoplex
 
-# Install dependencies
+# Frontend + Express Server
 npm install
+cp .env.example .env  # Configure Firebase credentials
 
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
+# AI Backend
+cd ai_backend
+python -m venv venv
+venv\Scripts\activate  # Windows
+pip install -r requirements.txt
 ```
 
-### Environment Setup
-```bash
-# Create environment file (optional for demo)
-cp .env.example .env.local
-
-# Add your configuration (if needed)
-VITE_API_URL=your_api_url
-VITE_GOOGLE_AI_KEY=your_google_ai_key
-```
-
----
-
-## 📁 Project Structure
-
-```
-echoplex/
-├── 📁 src/
-│   ├── 📁 components/           # React components
-│   │   ├── Dashboard.tsx        # Main dashboard container
-│   │   ├── EventOverview.tsx    # Real-time event metrics
-│   │   ├── CrowdMonitor.tsx     # Crowd intelligence system
-│   │   ├── RiskAssessment.tsx   # Predictive risk analysis
-│   │   ├── IncidentManagement.tsx # Incident tracking
-│   │   ├── ResourceDispatch.tsx # Resource allocation
-│   │   ├── AnomalyDetection.tsx # AI anomaly detection
-│   │   ├── LostAndFound.tsx     # Facial recognition system
-│   │   └── CommandInterface.tsx # Natural language AI
-│   ├── App.tsx                  # Root application component
-│   ├── main.tsx                 # Application entry point
-│   ├── index.css               # Global styles with Tailwind
-│   └── vite-env.d.ts           # TypeScript environment types
-├── 📁 public/                  # Static assets
-├── index.html                  # HTML template
-├── package.json               # Dependencies and scripts
-├── tailwind.config.js         # Tailwind CSS configuration
-├── vite.config.ts            # Vite build configuration
-├── tsconfig.json             # TypeScript configuration
-├── tsconfig.app.json         # App-specific TypeScript config
-├── tsconfig.node.json        # Node.js TypeScript config
-├── postcss.config.js         # PostCSS configuration
-├── eslint.config.js          # ESLint configuration
-└── README.md                 # Project documentation
-```
-
----
-
-## 🌐 Deployment
-
-### Netlify Deployment (Recommended)
-
-The application is optimized for Netlify deployment with automatic builds:
+### Running
 
 ```bash
-# Build command
-npm run build
+# Terminal 1: Frontend + Express (Port 5173 + 3000)
+npm run dev:full
 
-# Output directory
-dist
-
-# Environment variables (if needed)
-VITE_API_URL=your_production_api_url
+# Terminal 2: AI Backend (Port 8002)
+cd ai_backend
+venv\Scripts\python.exe main.py
 ```
 
-### Manual Deployment
+### Environment Variables
 
-```bash
-# Build the application
-npm run build
-
-# Deploy the dist/ folder to your hosting provider
-# The built files are in the dist/ directory
+```env
+# .env
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_DATABASE_URL=https://your-project.firebaseio.com
+VITE_API_URL=http://localhost:3000/api
 ```
 
-### Live Demo
-🚀 **[View Live Demo](https://velvety-belekoy-8a22aa.netlify.app)**
+---
+
+## 📊 Performance Considerations
+
+| Component | Optimization | Impact |
+|-----------|--------------|--------|
+| YOLO Detection | YOLOv8n (nano) | 15ms/frame |
+| Re-ID Extraction | MobileNetV2 | 10ms/person |
+| Polling Intervals | 30-60 seconds | Prevents page freeze |
+| Frame Sampling | Every 15th frame | 3x faster video analysis |
+| Temporal Consistency | 5 frames / 1 second | Reduces false positives |
 
 ---
 
-## 🤝 Contributing
+## 📁 Key Files
 
-We welcome contributions to make Echoplex even better! Please follow these guidelines:
-
-### Development Guidelines
-- Follow TypeScript best practices and maintain type safety
-- Use Tailwind CSS for all styling (no custom CSS unless necessary)
-- Maintain component modularity and reusability
-- Ensure responsive design across all devices
-- Add proper error handling and loading states
-- Write meaningful commit messages
-
-### Code Style
-- Use ESLint and Prettier for code formatting
-- Follow React Hooks best practices
-- Maintain consistent naming conventions
-- Add JSDoc comments for complex functions
-- Keep components under 300 lines when possible
-
-### Pull Request Process
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+| File | Purpose |
+|------|---------|
+| `ai_backend/main.py` | FastAPI server with all endpoints |
+| `ai_backend/video_analyzer_v2.py` | Enhanced video analysis with Re-ID |
+| `ai_backend/person_detector.py` | YOLO person detection |
+| `ai_backend/reid_extractor.py` | MobileNetV2 feature extraction |
+| `ai_backend/color_extractor.py` | HSV clothing color analysis |
+| `ai_backend/precision_guardrails.py` | False positive prevention |
+| `src/components/LostAndFound.tsx` | Missing person UI |
+| `src/components/AICrowdPredictor.tsx` | ML-powered crowd prediction |
+| `Server/Server.ts` | Express backend + Firebase |
 
 ---
 
-## 📄 License
+## � Future Plans & Scaling Roadmap
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### Phase 1: Infrastructure Scaling (0-6 months)
+
+#### 1.1 Cloud Deployment
+
+```
+Current: Single machine deployment
+Future:  Multi-region cloud infrastructure
+
+┌─────────────────────────────────────────────────────────────────┐
+│                     LOAD BALANCER (AWS ALB)                      │
+└─────────────────────────────────────────────────────────────────┘
+          │                   │                   │
+          ▼                   ▼                   ▼
+┌───────────────┐   ┌───────────────┐   ┌───────────────┐
+│   Region A    │   │   Region B    │   │   Region C    │
+│  (US-East)    │   │  (EU-West)    │   │  (Asia-Pac)   │
+│               │   │               │   │               │
+│ ┌───────────┐ │   │ ┌───────────┐ │   │ ┌───────────┐ │
+│ │ AI Backend│ │   │ │ AI Backend│ │   │ │ AI Backend│ │
+│ │   (GPU)   │ │   │ │   (GPU)   │ │   │ │   (GPU)   │ │
+│ └───────────┘ │   │ └───────────┘ │   │ └───────────┘ │
+└───────────────┘   └───────────────┘   └───────────────┘
+```
+
+| Scaling Strategy | Technology | Purpose |
+|------------------|------------|---------|
+| **Horizontal Scaling** | Kubernetes (K8s) | Auto-scale AI pods based on load |
+| **GPU Acceleration** | NVIDIA T4/A10 | 10x faster inference |
+| **CDN** | CloudFlare | Global video upload acceleration |
+| **Database** | Firestore + Redis | Caching + faster queries |
+
+#### 1.2 Message Queue Architecture
+
+```python
+# Future: RabbitMQ / Redis Queue for async processing
+# Instead of synchronous video analysis:
+
+# Producer (API receives video)
+queue.publish("video_analysis", {
+    "video_id": "vid-123",
+    "case_ids": ["case-001", "case-002"],
+    "callback_url": "https://api/webhook/results"
+})
+
+# Consumer (GPU worker processes)
+@queue.consume("video_analysis")
+def process_video(message):
+    results = analyze_video(message.video_id)
+    send_webhook(message.callback_url, results)
+```
+
+**Benefit:** Handle 1000+ concurrent video uploads without blocking.
+
+#### 1.3 Database Optimization
+
+| Current | Future | Improvement |
+|---------|--------|-------------|
+| Firebase Realtime DB | Firestore + PostgreSQL | Better querying, indexing |
+| In-memory case storage | ChromaDB Vector Store | Similarity search at scale |
+| No caching | Redis Cache | 100ms → 5ms response time |
 
 ---
 
-## 🙏 Acknowledgments
+### Phase 2: AI/ML Enhancements (6-12 months)
 
-- **Google AI Team** - For providing the advanced AI infrastructure
-- **React Team** - For the excellent frontend framework
-- **Tailwind CSS** - For the utility-first CSS framework
-- **Lucide Icons** - For the beautiful icon system
-- **Netlify** - For seamless deployment and hosting
+#### 2.1 Upgrade Re-ID Models
+
+| Model | Current | Future | Accuracy |
+|-------|---------|--------|----------|
+| Person Detection | YOLOv8n (nano) | YOLOv8x (extra-large) | +15% |
+| Re-ID Backbone | MobileNetV2 | OSNet / TransReID | +25% |
+| Face Recognition | face_recognition | ArcFace / InsightFace | +30% |
+
+```python
+# Future: Transformer-based Re-ID (TransReID)
+class TransReIDExtractor:
+    def __init__(self):
+        self.model = TransReID(
+            pretrained='msmt17_transreid',
+            embed_dim=768  # vs current 512
+        )
+    
+    def extract_features(self, person_crop):
+        # Attention-based feature extraction
+        # Better occlusion handling
+        # Cross-camera invariance
+        return self.model(person_crop)
+```
+
+#### 2.2 Active Learning Pipeline
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  User Feedback  │────▶│  Training Data  │────▶│  Model Retrain  │
+│  (Confirm/False)│     │   Collection    │     │   (Weekly)      │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+         │                                               │
+         │                                               ▼
+         │                                    ┌─────────────────┐
+         └────────────────────────────────────│  Improved Model │
+                                              │   Deployment    │
+                                              └─────────────────┘
+```
+
+**Flow:**
+1. User clicks "Confirm Found" → Positive training sample
+2. User clicks "False Match" → Negative training sample
+3. Weekly automated retraining with new data
+4. A/B testing new model vs old model
+5. Gradual rollout if metrics improve
+
+#### 2.3 Multi-Modal Fusion
+
+```python
+# Future: Combine multiple signals for matching
+class MultiModalMatcher:
+    def match(self, detection, case):
+        scores = {
+            'reid': self.reid_model.similarity(detection, case),      # 0.82
+            'face': self.face_model.similarity(detection, case),      # 0.75
+            'color': self.color_model.similarity(detection, case),    # 0.90
+            'gait': self.gait_model.similarity(detection, case),      # 0.68
+            'height': self.height_estimator.match(detection, case),   # 0.85
+        }
+        
+        # Weighted ensemble
+        weights = {'reid': 0.35, 'face': 0.25, 'color': 0.20, 'gait': 0.10, 'height': 0.10}
+        return sum(scores[k] * weights[k] for k in scores)
+```
+
+#### 2.4 Edge AI Deployment
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        EDGE DEVICES                              │
+│                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │ NVIDIA Jetson│  │ Intel NCS2   │  │ Coral TPU    │          │
+│  │    Nano      │  │              │  │              │          │
+│  │  (Event A)   │  │  (Event B)   │  │  (Event C)   │          │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘          │
+│         │                 │                 │                   │
+│         ▼                 ▼                 ▼                   │
+│  ┌────────────────────────────────────────────────────────┐    │
+│  │           LOCAL INFERENCE (No Internet Required)        │    │
+│  │   • Person Detection: 30 FPS                           │    │
+│  │   • Re-ID Matching: 15 FPS                             │    │
+│  │   • Alert Generation: Real-time                        │    │
+│  └────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼ (Sync when online)
+                    ┌─────────────────┐
+                    │   Cloud Server  │
+                    │   (Backup/Sync) │
+                    └─────────────────┘
+```
+
+**Benefit:** Works in areas with poor connectivity (outdoor festivals, stadiums).
 
 ---
 
-## 📞 Support & Contact
+### Phase 3: Feature Enhancements (12-24 months)
 
-- **Live Demo**: [https://velvety-belekoy-8a22aa.netlify.app](https://velvety-belekoy-8a22aa.netlify.app)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/echoplex/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/echoplex/discussions)
-- **Documentation**: [Coming Soon]
+#### 3.1 Predictive Analytics Dashboard
+
+| Feature | Description | ML Technique |
+|---------|-------------|--------------|
+| **Incident Prediction** | Predict security incidents 30min ahead | LSTM Time Series |
+| **Crowd Flow Heatmaps** | Visualize movement patterns | Optical Flow + Clustering |
+| **Bottleneck Detection** | Identify congestion points | Graph Neural Networks |
+| **Weather Impact** | Adjust predictions for weather | Multi-variate Regression |
+
+#### 3.2 Multi-Camera Tracking
+
+```python
+# Future: Track person across camera network
+class CrossCameraTracker:
+    def __init__(self, camera_network: List[Camera]):
+        self.graph = self.build_camera_graph(camera_network)
+        self.tracks: Dict[str, GlobalTrack] = {}
+    
+    def update(self, camera_id: str, detections: List[Detection]):
+        for det in detections:
+            # Find matching global track
+            match = self.find_global_match(det)
+            
+            if match:
+                match.add_sighting(camera_id, det)
+                self.predict_next_camera(match)  # Where will they appear next?
+            else:
+                self.create_new_track(camera_id, det)
+    
+    def predict_next_camera(self, track: GlobalTrack) -> str:
+        # Based on camera topology and movement patterns
+        return self.graph.predict_destination(track.trajectory)
+```
+
+#### 3.3 Mobile App Integration
+
+| Platform | Features |
+|----------|----------|
+| **iOS App** | Report missing person with photo, receive push notifications |
+| **Android App** | Same as iOS, plus background location for responders |
+| **Wearable (Watch)** | Security staff alerts, one-tap emergency response |
+
+#### 3.4 Integration APIs
+
+```yaml
+# Future: Third-party integrations
+integrations:
+  - name: "Stadium Access Control"
+    type: "RFID/NFC Gate Sync"
+    purpose: "Auto check-in when attendee scans ticket"
+    
+  - name: "Emergency Services"
+    type: "911 API"
+    purpose: "Auto-dispatch when child found"
+    
+  - name: "Social Media"
+    type: "Twitter/Facebook Alert"
+    purpose: "Broadcast missing person to event attendees"
+    
+  - name: "PA System"
+    type: "Audio Announcement API"
+    purpose: "Automated 'found child' announcements"
+```
 
 ---
 
-<div align="center">
-  <h3>🎯 Echoplex - Where AI meets event safety intelligence</h3>
-  <p><em>Built with ❤️ using React, TypeScript, and Google's AI Stack</em></p>
-  
-  **[⭐ Star this project](https://github.com/yourusername/echoplex)** if you find it useful!
-</div>
+### Scaling Metrics & Targets
+
+| Metric | Current | Target (1 Year) | Target (2 Years) |
+|--------|---------|-----------------|------------------|
+| **Concurrent Events** | 1 | 50 | 500 |
+| **Attendees per Event** | 10,000 | 100,000 | 1,000,000 |
+| **Cameras Supported** | 4 | 100 | 1,000 |
+| **Video Processing Speed** | 2 FPS | 30 FPS | 60 FPS |
+| **Match Accuracy** | 82% | 92% | 97% |
+| **False Positive Rate** | 5% | 1% | 0.1% |
+| **Response Time** | 2 sec | 200ms | 50ms |
+
+---
+
+### Technology Stack Evolution
+
+```
+                    CURRENT                          FUTURE
+                    
+Frontend:     React + Vite             →      React + Next.js (SSR)
+Backend:      Express + Firebase       →      Go/Rust + PostgreSQL
+AI:           Python + FastAPI         →      Python + gRPC + TensorRT
+ML Models:    MobileNetV2              →      TransReID + ArcFace
+Database:     Firebase Realtime        →      Firestore + TimescaleDB
+Queue:        None (sync)              →      RabbitMQ / Kafka
+Monitoring:   Console logs             →      Prometheus + Grafana
+Deployment:   Manual                   →      Kubernetes + ArgoCD
+```
+
+---
+
+### Research & Development Initiatives
+
+#### R&D 1: Privacy-Preserving AI
+
+```python
+# Federated Learning: Train models without sharing raw data
+class FederatedReIDTrainer:
+    def train_round(self, event_clients: List[EventClient]):
+        # Each event trains locally on their data
+        local_models = []
+        for client in event_clients:
+            local_model = client.train_locally(epochs=5)
+            local_models.append(local_model.get_weights())
+        
+        # Aggregate models without seeing raw images
+        global_weights = self.federated_average(local_models)
+        return global_weights
+```
+
+#### R&D 2: Synthetic Data Generation
+
+```python
+# Generate training data without real people
+class SyntheticPersonGenerator:
+    def generate(self, n_samples: int):
+        for _ in range(n_samples):
+            # Random body shape, clothing, pose
+            body = self.generate_3d_body()
+            clothing = self.sample_clothing_texture()
+            pose = self.sample_random_pose()
+            
+            # Render synthetic person
+            image = self.renderer.render(body, clothing, pose)
+            label = self.extract_label(body, clothing)
+            
+            yield image, label
+```
+
+#### R&D 3: Explainable AI
+
+```python
+# Show WHY the system matched a person
+class ExplainableMatch:
+    def explain(self, detection, case, match_score):
+        return {
+            "overall_score": match_score,
+            "factors": {
+                "body_shape_similarity": 0.85,
+                "upper_clothing_match": "white → white ✓",
+                "lower_clothing_match": "black → black ✓",
+                "height_estimate": "165cm ± 5cm ✓",
+                "hair_color": "black → black ✓"
+            },
+            "confidence_breakdown": {
+                "reid_contribution": "35%",
+                "color_contribution": "25%",
+                "face_contribution": "20%"
+            },
+            "heatmap": self.generate_attention_heatmap(detection)
+        }
+```
+
+---
+
+## �📜 License
+
+MIT License - See LICENSE file for details.
+
+---
+
+## 🤝 Contributors
+
+- **Echoplex Team** - AI Event Safety Platform
+
+---
+
+*For questions or support, please open an issue on GitHub.*

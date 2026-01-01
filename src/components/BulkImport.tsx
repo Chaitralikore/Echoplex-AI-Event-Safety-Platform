@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Download, Users, CheckCircle, XCircle, FileText, Trash2 } from 'lucide-react';
+import { Upload, CheckCircle, XCircle, FileText, Trash2, LogIn, LogOut, X } from 'lucide-react';
 
 interface ImportResult {
   success: boolean;
@@ -35,7 +35,7 @@ const BulkImport: React.FC = () => {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         setResult({
           success: true,
@@ -66,40 +66,70 @@ const BulkImport: React.FC = () => {
 
   const parseCSV = (text: string) => {
     const lines = text.split('\n').filter(line => line.trim());
-    
+
     if (lines.length < 2) {
       throw new Error('CSV file is empty or invalid');
     }
 
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-    
-    // Validate required headers
-    if (!headers.includes('name') || !headers.includes('email') || !headers.includes('ticketid')) {
-      throw new Error('CSV must have columns: name, email, ticketId');
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[\s_]/g, ''));
+
+    // Map various column name formats to standard names
+    const columnMap: Record<string, string> = {
+      'name': 'name',
+      'email': 'email',
+      'emailid': 'email',
+      'email_id': 'email',
+      'ticketid': 'ticketId',
+      'ticket_id': 'ticketId',
+      'phone': 'phone',
+      'phoneno': 'phone',
+      'phone_no': 'phone',
+      'location': 'location',
+      'zone': 'location',
+      's.no': 'sno',
+      'sno': 'sno',
+      'serialno': 'sno'
+    };
+
+    // Normalize headers
+    const normalizedHeaders = headers.map(h => columnMap[h] || h);
+
+    // Validate required headers (name, email, ticketId)
+    const hasName = normalizedHeaders.includes('name');
+    const hasEmail = normalizedHeaders.includes('email');
+    const hasTicketId = normalizedHeaders.includes('ticketId');
+
+    if (!hasName || !hasEmail || !hasTicketId) {
+      throw new Error('CSV must have columns: Name, email_ID, Ticket_Id');
     }
 
     const attendees = [];
     for (let i = 1; i < lines.length; i++) {
       if (!lines[i].trim()) continue;
-      
+
       const values = lines[i].split(',').map(v => v.trim());
       const attendee: any = {};
-      
-      headers.forEach((header, index) => {
-        if (header === 'ticketid') {
-          attendee['ticketId'] = values[index];
-        } else {
-          attendee[header] = values[index];
+
+      normalizedHeaders.forEach((header, index) => {
+        if (header !== 'sno') { // Skip serial number column
+          attendee[header] = values[index] || '';
         }
       });
-      
+
       attendees.push(attendee);
     }
-    
+
     return attendees;
   };
 
-  const handleUpload = async () => {
+  const handleClearFile = () => {
+    setFile(null);
+    setResult(null);
+    const fileInput = document.getElementById('csv-upload') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+  };
+
+  const handleBulkAction = async (action: 'import' | 'check-in' | 'check-out') => {
     if (!file) return;
 
     setLoading(true);
@@ -107,54 +137,74 @@ const BulkImport: React.FC = () => {
 
     try {
       const text = await file.text();
-      const attendeeList = parseCSV(text);
+      const rows = parseCSV(text); // validation happens here
+      let endpoint = '';
+      let body: any = { eventId };
 
-      const response = await fetch(`${API_BASE_URL}/attendees/bulk-import`, {
+      if (action === 'import') {
+        endpoint = '/attendees/bulk-import';
+        body.attendeeList = rows;
+      } else if (action === 'check-in') {
+        endpoint = '/attendees/bulk-check-in';
+        body.ticketIds = rows.map(r => r.ticketId);
+      } else if (action === 'check-out') {
+        endpoint = '/attendees/bulk-check-out';
+        body.ticketIds = rows.map(r => r.ticketId);
+      }
+
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          attendeeList,
-          eventId
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
       setResult(data);
 
-      if (data.success) {
-        setFile(null);
-        // Reset file input
-        const fileInput = document.getElementById('csv-upload') as HTMLInputElement;
-        if (fileInput) fileInput.value = '';
+      if (data.success && action === 'import') {
+        // Only clear file on successful import if desired, but user might want to check-in immediately?
+        // Let's keep file selected for flexibility, unless it's import.
+        // Actually prompt says "Clear file button alongside" implying manual clear.
+        // Existing behavior clears file on success. I'll modify to ONLY clear on explicit action or maybe just import.
+        // Let's keep existing behavior for import, but for check-in/out maybe keep it?
+        // User request "clear file button", so I'll trust that for clearing.
+        // But for import, let's stick to existing behavior of clearing on success, OR remove it since we have a clear button now.
+        // I will REMOVE the auto-clear on success so user can do Import -> CheckIn sequence if they want.
+        // Wait, if they import, they aren't checked in? Usually "Import" just registers.
+        // So Import -> Check In flow makes sense.
       }
     } catch (error: any) {
       setResult({
         success: false,
-        message: error.message || 'Failed to process CSV file'
+        message: error.message || `Failed to ${action} attendees`
       });
     } finally {
       setLoading(false);
     }
   };
 
- /*const downloadSampleCSV = () => {
-    const csv = `name,email,phone,ticketId
-Anbreen Shabir,anbreen@example.com,+919234563265,TKT-001
-Ankita Sawai,ankita@example.com,+919390631629,TKT-002
-Chaitrali Kore,chaitrali@example.com,+917869872312,TKT-003
-Anjali Sharma,anjali@example.com,+918345678934,TKT-004
-Sneha Chavan,sneha@example.com,+918361678954,TKT-005`;
+  const handleUpload = () => handleBulkAction('import');
+  const handleBulkCheckIn = () => handleBulkAction('check-in');
+  const handleBulkCheckOut = () => handleBulkAction('check-out');
 
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'sample-attendees.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
-  }; */
+  /*const downloadSampleCSV = () => {
+     const csv = `name,email,phone,ticketId
+ Anbreen Shabir,anbreen@example.com,+919234563265,TKT-001
+ Ankita Sawai,ankita@example.com,+919390631629,TKT-002
+ Chaitrali Kore,chaitrali@example.com,+917869872312,TKT-003
+ Anjali Sharma,anjali@example.com,+918345678934,TKT-004
+ Sneha Chavan,sneha@example.com,+918361678954,TKT-005`;
+ 
+     const blob = new Blob([csv], { type: 'text/csv' });
+     const url = window.URL.createObjectURL(blob);
+     const a = document.createElement('a');
+     a.href = url;
+     a.download = 'sample-attendees.csv';
+     a.click();
+     window.URL.revokeObjectURL(url);
+   }; */
 
   return (
     <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
@@ -169,54 +219,82 @@ Sneha Chavan,sneha@example.com,+918361678954,TKT-005`;
         </div>
       </div>
 
-     
+
 
       {/* File Upload */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-slate-300 mb-2">
           Upload Attendee List (CSV File)
         </label>
-        <div className="flex flex-col md:flex-row gap-3">
+        <div className="flex flex-wrap gap-3 w-full">
           <input
             id="csv-upload"
             type="file"
             accept=".csv"
             onChange={handleFileChange}
-            className="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-500 file:text-white hover:file:bg-purple-600 file:cursor-pointer"
+            className="flex-1 min-w-[200px] px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-500 file:text-white hover:file:bg-purple-600 file:cursor-pointer"
           />
+          {file && (
+            <button
+              onClick={handleClearFile}
+              className="px-4 py-3 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition-colors flex items-center justify-center"
+              title="Clear file"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-wrap gap-3 mt-3">
           <button
             onClick={handleUpload}
             disabled={!file || loading || clearing}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
           >
             {loading ? (
-              <>
-                <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
-                Processing...
-              </>
+              <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
             ) : (
-              <>
-                <Upload className="w-5 h-5" />
-                Import Attendees
-              </>
+              <Upload className="w-5 h-5" />
             )}
+            Import
           </button>
+
+          <button
+            onClick={handleBulkCheckIn}
+            disabled={!file || loading || clearing}
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
+          >
+            {loading ? (
+              <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
+            ) : (
+              <LogIn className="w-5 h-5" />
+            )}
+            Check In
+          </button>
+
+          <button
+            onClick={handleBulkCheckOut}
+            disabled={!file || loading || clearing}
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
+          >
+            {loading ? (
+              <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
+            ) : (
+              <LogOut className="w-5 h-5" />
+            )}
+            Check Out
+          </button>
+
           <button
             onClick={handleClearAttendees}
             disabled={loading || clearing}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
-            title="Clear all attendees before re-importing"
+            className="px-6 py-3 bg-red-500 hover:bg-red-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
+            title="Clear all attendees from database"
           >
             {clearing ? (
-              <>
-                <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
-                Clearing...
-              </>
+              <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
             ) : (
-              <>
-                <Trash2 className="w-5 h-5" />
-                Clear All
-              </>
+              <Trash2 className="w-5 h-5" />
             )}
           </button>
         </div>
@@ -230,11 +308,10 @@ Sneha Chavan,sneha@example.com,+918361678954,TKT-005`;
       {/* Result Display */}
       {result && (
         <div
-          className={`p-4 rounded-lg border ${
-            result.success
-              ? 'bg-emerald-500/10 border-emerald-500/20'
-              : 'bg-red-500/10 border-red-500/20'
-          }`}
+          className={`p-4 rounded-lg border ${result.success
+            ? 'bg-emerald-500/10 border-emerald-500/20'
+            : 'bg-red-500/10 border-red-500/20'
+            }`}
         >
           <div className="flex items-center gap-3 mb-3">
             {result.success ? (
@@ -246,36 +323,36 @@ Sneha Chavan,sneha@example.com,+918361678954,TKT-005`;
               {result.message}
             </p>
           </div>
-          
+
           {result.data && (
             <>
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <div className="bg-slate-700/50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <CheckCircle className="w-5 h-5 text-emerald-400" />
-                    <span className="text-slate-400 text-sm">Successfully Imported</span>
+                    <span className="text-slate-400 text-sm">Success</span>
                   </div>
-                  <p className="text-3xl font-bold text-emerald-400">{result.data.imported}</p>
+                  <p className="text-3xl font-bold text-emerald-400">{result.data.imported || result.data.successfulCount}</p>
                 </div>
                 <div className="bg-slate-700/50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <XCircle className="w-5 h-5 text-red-400" />
                     <span className="text-slate-400 text-sm">Failed</span>
                   </div>
-                  <p className="text-3xl font-bold text-red-400">{result.data.failed}</p>
+                  <p className="text-3xl font-bold text-red-400">{result.data.failed || result.data.failedCount}</p>
                 </div>
               </div>
 
               {/* Show failed records if any */}
-              {result.data.failedRecords && result.data.failedRecords.length > 0 && (
+              {(result.data.failedRecords || result.data.failedDetails) && (result.data.failedRecords?.length > 0 || result.data.failedDetails?.length > 0) && (
                 <div className="mt-4 bg-slate-700/50 rounded-lg p-4">
                   <h4 className="text-white font-medium mb-3">Failed Records:</h4>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {result.data.failedRecords.map((record, index) => (
+                    {(result.data.failedRecords || result.data.failedDetails).map((record: any, index: number) => (
                       <div key={index} className="text-sm bg-slate-800 rounded p-2">
                         <p className="text-red-400">{record.reason}</p>
                         <p className="text-slate-400 text-xs mt-1">
-                          {JSON.stringify(record.attendee)}
+                          {record.ticketId ? `Ticket ID: ${record.ticketId}` : JSON.stringify(record.attendee)}
                         </p>
                       </div>
                     ))}
@@ -296,11 +373,19 @@ Sneha Chavan,sneha@example.com,+918361678954,TKT-005`;
         <div className="space-y-2 text-sm text-slate-300">
           <div className="flex items-start gap-2">
             <span className="text-emerald-400 font-bold">✓</span>
-            <span><strong>Required columns:</strong> name, email, ticketId</span>
+            <span><strong>Required columns:</strong> Name, email_ID, Ticket_Id</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-cyan-400 font-bold">•</span>
-            <span><strong>Optional column:</strong> phone</span>
+            <span><strong>Optional columns:</strong> Phone no, Location</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-cyan-400 font-bold">•</span>
+            <span><strong>Location</strong> updates Zone Occupancy on check-in</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-cyan-400 font-bold">•</span>
+            <span>Supports <strong>10,000+</strong> attendees per file</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-cyan-400 font-bold">•</span>
@@ -308,15 +393,7 @@ Sneha Chavan,sneha@example.com,+918361678954,TKT-005`;
           </div>
           <div className="flex items-start gap-2">
             <span className="text-cyan-400 font-bold">•</span>
-            <span>Each ticket ID must be unique</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="text-cyan-400 font-bold">•</span>
-            <span>Use comma (,) as separator</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="text-cyan-400 font-bold">•</span>
-            <span>Save file as .csv format</span>
+            <span>Each Ticket_Id must be unique</span>
           </div>
         </div>
 

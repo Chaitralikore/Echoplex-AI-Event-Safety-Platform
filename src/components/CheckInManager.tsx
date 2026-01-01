@@ -47,7 +47,8 @@ const CheckInManager: React.FC = () => {
   useEffect(() => {
     fetchCheckedInAttendees();
     // Auto-refresh every 10 seconds
-    const interval = setInterval(fetchCheckedInAttendees, 10000);
+    // Reduced from 10s to 60s for performance with large datasets
+    const interval = setInterval(fetchCheckedInAttendees, 60000);
     return () => clearInterval(interval);
   }, [eventId]);
 
@@ -116,9 +117,9 @@ const CheckInManager: React.FC = () => {
       const data = await response.json();
 
       if (data.success) {
-        setMessage({ 
-          type: 'success', 
-          text: `${data.message} - Duration: ${data.data.durationMinutes} minutes` 
+        setMessage({
+          type: 'success',
+          text: `${data.message} - Duration: ${data.data.durationMinutes} minutes`
         });
         setAttendeeData(data.data.attendee);
         setTicketId('');
@@ -276,11 +277,10 @@ const CheckInManager: React.FC = () => {
       {/* Message Display */}
       {message && (
         <div
-          className={`p-4 rounded-lg mb-6 ${
-            message.type === 'success'
+          className={`p-4 rounded-lg mb-6 ${message.type === 'success'
               ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
               : 'bg-red-500/10 border border-red-500/20 text-red-400'
-          }`}
+            }`}
         >
           {message.text}
         </div>
@@ -374,7 +374,7 @@ const CheckInManager: React.FC = () => {
             Refresh
           </button>
         </div>
-        
+
         {checkedInList.length === 0 ? (
           <div className="p-8 text-center text-slate-400">
             <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
@@ -411,7 +411,7 @@ const CheckInManager: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-slate-300 text-sm">
-                      {attendee.checkInTime 
+                      {attendee.checkInTime
                         ? new Date(attendee.checkInTime).toLocaleString()
                         : 'N/A'
                       }

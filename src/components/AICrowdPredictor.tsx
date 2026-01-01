@@ -96,7 +96,7 @@ class KMeansClustering {
       });
 
       // Check convergence
-      const converged = newCentroids.every((c, i) => 
+      const converged = newCentroids.every((c, i) =>
         Math.abs(c - this.centroids[i]) < 0.01
       );
 
@@ -137,7 +137,7 @@ class MovingAverage {
 
   calculate(data: number[]): number[] {
     const result: number[] = [];
-    
+
     for (let i = 0; i < data.length; i++) {
       const start = Math.max(0, i - this.windowSize + 1);
       const window = data.slice(start, i + 1);
@@ -152,6 +152,9 @@ class MovingAverage {
 // 4. SURGE DETECTION ALGORITHM
 class SurgeDetector {
   private threshold: number;
+  // Absolute capacity thresholds
+  private readonly HIGH_CAPACITY = 8000;
+  private readonly MEDIUM_CAPACITY = 5000;
 
   constructor(threshold: number = 1.5) {
     this.threshold = threshold;
@@ -172,19 +175,44 @@ class SurgeDetector {
   }
 
   getRiskLevel(data: number[]): 'low' | 'medium' | 'high' {
-    if (data.length < 3) return 'low';
+    // Get current count (latest data point)
+    const currentCount = data.length > 0 ? data[data.length - 1] : 0;
+
+    // PRIORITY 1: Absolute capacity thresholds (regardless of trend)
+    // If we have a large crowd, risk is automatically elevated
+    if (currentCount >= this.HIGH_CAPACITY) {
+      return 'high';
+    }
+    if (currentCount >= this.MEDIUM_CAPACITY) {
+      return 'medium';
+    }
+
+    // PRIORITY 2: Rate of change analysis (for smaller crowds)
+    if (data.length < 3) {
+      // Not enough trend data, but check absolute count
+      if (currentCount >= 3000) return 'medium';
+      return 'low';
+    }
 
     const recent = data.slice(-3);
     const older = data.slice(-6, -3);
 
-    if (older.length === 0) return 'low';
+    if (older.length === 0) {
+      if (currentCount >= 3000) return 'medium';
+      return 'low';
+    }
 
     const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
     const olderAvg = older.reduce((a, b) => a + b, 0) / older.length;
     const ratio = recentAvg / (olderAvg || 1);
 
+    // Rate-based risk (for rapid increases)
     if (ratio > 1.8) return 'high';
     if (ratio > 1.3) return 'medium';
+
+    // If crowd is moderately sized but stable, still medium risk
+    if (currentCount >= 3000) return 'medium';
+
     return 'low';
   }
 }
@@ -204,7 +232,7 @@ const AICrowdPredictor: React.FC = () => {
   const [predictions, setPredictions] = useState<number[]>([]);
   const [surgeDetected, setSurgeDetected] = useState(false);
   const [riskLevel, setRiskLevel] = useState<'low' | 'medium' | 'high'>('low');
-  
+
   // Initialize ML models using useMemo to avoid re-creation on every render
   const mlModels = React.useMemo(() => ({
     regression: new LinearRegressionModel(),
@@ -239,15 +267,19 @@ const AICrowdPredictor: React.FC = () => {
         setHistoricalData(prev => {
           const updated = [...prev, newDataPoint].slice(-30); // Keep last 30 points
 
+          // Extract counts for ML processing
+          const counts = updated.map(d => d.count);
+
+          // ALWAYS run surge detection (works with any data length due to absolute thresholds)
+          const risk = mlModels.surgeDetector.getRiskLevel(counts);
+          setRiskLevel(risk);
+
           if (updated.length >= 5) {
-            // Extract counts for ML processing
-            const counts = updated.map(d => d.count);
-            
             // 1. LINEAR REGRESSION - Predict future attendance
             const X = counts.map((_, i) => i);
             const y = counts;
             mlModels.regression.train(X, y);
-            
+
             const futurePredictions: number[] = [];
             for (let i = 1; i <= 6; i++) {
               const predicted = Math.max(0, Math.round(mlModels.regression.predict(counts.length + i)));
@@ -262,12 +294,9 @@ const AICrowdPredictor: React.FC = () => {
             // 3. MOVING AVERAGE - Smooth trends (used for internal calculations)
             mlModels.movingAvg.calculate(counts);
 
-            // 4. SURGE DETECTION - Identify rapid increases
+            // 4. SURGE DETECTION - Identify rapid increases (rate-based)
             const isSurge = mlModels.surgeDetector.detect(counts);
-            const risk = mlModels.surgeDetector.getRiskLevel(counts);
-            
             setSurgeDetected(isSurge);
-            setRiskLevel(risk);
 
             // Update model statistics
             const params = mlModels.regression.getParameters();
@@ -277,6 +306,10 @@ const AICrowdPredictor: React.FC = () => {
               clusters: centroids.sort((a, b) => a - b),
               accuracy: Math.max(0, 100 - Math.abs(params.slope) * 2)
             });
+          } else {
+            // Not enough data for full ML, but still provide basic info
+            setSurgeDetected(false);
+            setPredictions([currentCount]); // Predict stable if no trend data
           }
 
           return updated;
@@ -289,7 +322,8 @@ const AICrowdPredictor: React.FC = () => {
 
   useEffect(() => {
     runMLPrediction();
-    const interval = setInterval(runMLPrediction, 8000); // Update every 8 seconds
+    // Reduced from 8s to 30s for performance with large datasets
+    const interval = setInterval(runMLPrediction, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -430,11 +464,10 @@ const AICrowdPredictor: React.FC = () => {
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">Trend:</span>
-              <span className={`font-semibold capitalize ${
-                trend === 'increasing' ? 'text-red-400' : 
-                trend === 'decreasing' ? 'text-emerald-400' : 
-                'text-yellow-400'
-              }`}>
+              <span className={`font-semibold capitalize ${trend === 'increasing' ? 'text-red-400' :
+                trend === 'decreasing' ? 'text-emerald-400' :
+                  'text-yellow-400'
+                }`}>
                 {trend}
               </span>
             </div>
@@ -453,11 +486,10 @@ const AICrowdPredictor: React.FC = () => {
               <p className="text-slate-400">Centroids:</p>
               {modelStats.clusters.map((centroid, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${
-                    i === 0 ? 'bg-emerald-500' : 
-                    i === 1 ? 'bg-yellow-500' : 
-                    'bg-red-500'
-                  }`}></div>
+                  <div className={`w-3 h-3 rounded-full ${i === 0 ? 'bg-emerald-500' :
+                    i === 1 ? 'bg-yellow-500' :
+                      'bg-red-500'
+                    }`}></div>
                   <span className="text-white font-mono">{centroid.toFixed(2)}</span>
                   <span className="text-slate-500 text-xs">
                     ({i === 0 ? 'Low' : i === 1 ? 'Medium' : 'High'} Crowd)
@@ -512,8 +544,8 @@ const AICrowdPredictor: React.FC = () => {
 
         <div className="mt-4 pt-4 border-t border-slate-600">
           <p className="text-slate-400 text-xs">
-            <strong className="text-white">Data Processing:</strong> Real-time feature extraction from check-in data • 
-            <strong className="text-white"> Model Training:</strong> Continuous online learning with sliding window • 
+            <strong className="text-white">Data Processing:</strong> Real-time feature extraction from check-in data •
+            <strong className="text-white"> Model Training:</strong> Continuous online learning with sliding window •
             <strong className="text-white"> Prediction:</strong> Multi-step ahead forecasting (up to 60 minutes)
           </p>
         </div>

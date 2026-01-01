@@ -19,6 +19,14 @@ interface Attendee {
 
 const attendees = new Map<string, Attendee>();
 
+// Cache for zone stats to improve performance with large datasets
+let zoneStatsCache: {
+  eventId: string;
+  data: { totalCheckedIn: number; zones: Record<string, number> };
+  timestamp: number;
+} | null = null;
+const CACHE_TTL = 5000; // 5 second cache TTL
+
 // POST: Check-in attendee
 router.post('/check-in', async (req: Request, res: Response) => {
   try {
@@ -114,8 +122,8 @@ router.post('/check-out', async (req: Request, res: Response) => {
     attendees.set(attendee.id, attendee);
 
     // Calculate duration
-    const duration = new Date(attendee.checkOutTime).getTime() - 
-                    new Date(attendee.checkInTime!).getTime();
+    const duration = new Date(attendee.checkOutTime).getTime() -
+      new Date(attendee.checkInTime!).getTime();
     const durationMinutes = Math.floor(duration / 60000);
 
     return res.status(200).json({
@@ -201,7 +209,7 @@ router.post('/register', async (req: Request, res: Response) => {
     }
 
     const id = `ATD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const newAttendee: Attendee = {
       id,
       name,
@@ -234,24 +242,55 @@ router.post('/register', async (req: Request, res: Response) => {
 router.get('/zones/:eventId', async (req: Request, res: Response) => {
   try {
     const { eventId } = req.params;
-    
+
+    // Check cache first for performance with large datasets
+    const now = Date.now();
+    if (zoneStatsCache &&
+      zoneStatsCache.eventId === eventId &&
+      (now - zoneStatsCache.timestamp) < CACHE_TTL) {
+      return res.status(200).json({
+        success: true,
+        data: zoneStatsCache.data,
+        cached: true
+      });
+    }
+
     // Get all checked-in attendees for this event
     const allAttendees = Array.from(attendees.values())
       .filter(a => a.eventId === eventId && a.status === 'checked_in');
-    
-    // Group attendees by zone/location
+
+    // Standard zone names for normalization (case-insensitive matching)
+    const standardZones: Record<string, string> = {
+      'main entrance': 'Main Entrance',
+      'vip section': 'VIP Section',
+      'general area': 'General Area',
+      'food court': 'Food Court',
+    };
+
+    // Normalize zone name to standard format
+    const normalizeZone = (location: string): string => {
+      const lower = location.toLowerCase().trim();
+      return standardZones[lower] || location;
+    };
+
+    // Group attendees by normalized zone/location
     const zoneStats = allAttendees.reduce((acc, attendee) => {
-      const zone = attendee.location || 'Unknown';
+      const zone = normalizeZone(attendee.location || 'Unknown');
       acc[zone] = (acc[zone] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
+
+    const data = {
+      totalCheckedIn: allAttendees.length,
+      zones: zoneStats
+    };
+
+    // Update cache
+    zoneStatsCache = { eventId, data, timestamp: now };
+
     return res.status(200).json({
       success: true,
-      data: {
-        totalCheckedIn: allAttendees.length,
-        zones: zoneStats
-      }
+      data
     });
   } catch (error) {
     console.error('Zone stats error:', error);
@@ -319,7 +358,7 @@ router.post('/check-in/qr', async (req: Request, res: Response) => {
 router.delete('/clear/:eventId', async (req: Request, res: Response) => {
   try {
     const { eventId } = req.params;
-    
+
     // Find and remove all attendees for this event
     const toDelete: string[] = [];
     attendees.forEach((attendee, id) => {
@@ -327,9 +366,9 @@ router.delete('/clear/:eventId', async (req: Request, res: Response) => {
         toDelete.push(id);
       }
     });
-    
+
     toDelete.forEach(id => attendees.delete(id));
-    
+
     return res.status(200).json({
       success: true,
       message: `Cleared ${toDelete.length} attendees for event ${eventId}`,
@@ -363,13 +402,13 @@ router.post('/bulk-import', async (req: Request, res: Response) => {
     // Process each attendee
     for (const attendee of attendeeList) {
       try {
-        const { name, email, phone, ticketId } = attendee;
+        const { name, email, phone, ticketId, location } = attendee;
 
         // Validate required fields
         if (!name || !email || !ticketId) {
-          failed.push({ 
-            attendee, 
-            reason: 'Missing required fields (name, email, or ticketId)' 
+          failed.push({
+            attendee,
+            reason: 'Missing required fields (name, email, or ticketId)'
           });
           continue;
         }
@@ -380,17 +419,17 @@ router.post('/bulk-import', async (req: Request, res: Response) => {
         );
 
         if (existingAttendee) {
-          failed.push({ 
-            attendee, 
-            reason: `Ticket ID ${ticketId} already exists` 
+          failed.push({
+            attendee,
+            reason: `Ticket ID ${ticketId} already exists`
           });
           continue;
         }
 
         // Generate unique attendee ID
         const id = `ATD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        
-        // Create new attendee
+
+        // Create new attendee with location for zone tracking
         const newAttendee: Attendee = {
           id,
           name: name.trim(),
@@ -400,7 +439,8 @@ router.post('/bulk-import', async (req: Request, res: Response) => {
           eventId,
           checkInTime: null,
           checkOutTime: null,
-          status: 'not_checked_in'
+          status: 'not_checked_in',
+          location: location ? location.trim() : undefined
         };
 
         attendees.set(id, newAttendee);
@@ -427,4 +467,140 @@ router.post('/bulk-import', async (req: Request, res: Response) => {
     });
   }
 });
+// POST: Bulk check-in attendees via Ticket IDs
+router.post('/bulk-check-in', async (req: Request, res: Response) => {
+  try {
+    const { ticketIds, eventId, zoneId, zoneName } = req.body;
+
+    if (!Array.isArray(ticketIds) || !eventId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Ticket IDs array and Event ID are required'
+      });
+    }
+
+    const successful: { ticketId: string; location: string }[] = [];
+    const failed = [];
+    const zoneOccupancy: Record<string, number> = {};
+
+    // Optimization: Create a lookup map for TicketID -> Attendee to avoid O(N*M) complexity
+    // This makes it O(N + M) where N is total attendees and M is bulk list size
+    const ticketMap = new Map<string, Attendee>();
+    for (const attendee of attendees.values()) {
+      if (attendee.eventId === eventId) {
+        ticketMap.set(attendee.ticketId, attendee);
+      }
+    }
+
+    for (const ticketId of ticketIds) {
+      const attendee = ticketMap.get(ticketId);
+
+      if (!attendee) {
+        failed.push({ ticketId, reason: 'Attendee not found' });
+        continue;
+      }
+
+      if (attendee.status === 'checked_in') {
+        failed.push({ ticketId, reason: 'Already checked in' });
+        continue;
+      }
+
+      // Use attendee's stored location from CSV, or fallback to provided zone or default
+      const checkInLocation = attendee.location || zoneName || zoneId || 'Main Entrance';
+
+      // Update status
+      attendee.checkInTime = new Date().toISOString();
+      attendee.status = 'checked_in';
+      attendee.location = checkInLocation;
+
+      // Track zone occupancy
+      zoneOccupancy[checkInLocation] = (zoneOccupancy[checkInLocation] || 0) + 1;
+
+      successful.push({ ticketId, location: checkInLocation });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Bulk check-in complete. Success: ${successful.length}, Failed: ${failed.length}`,
+      data: {
+        successfulCount: successful.length,
+        failedCount: failed.length,
+        failedDetails: failed,
+        zoneOccupancy // Zone -> count mapping for UI display
+      }
+    });
+
+  } catch (error) {
+    console.error('Bulk check-in error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error during bulk check-in'
+    });
+  }
+});
+
+// POST: Bulk check-out attendees via Ticket IDs
+router.post('/bulk-check-out', async (req: Request, res: Response) => {
+  try {
+    const { ticketIds, eventId } = req.body;
+
+    if (!Array.isArray(ticketIds) || !eventId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Ticket IDs array and Event ID are required'
+      });
+    }
+
+    const successful = [];
+    const failed = [];
+
+    // Optimization: Create a lookup map
+    const ticketMap = new Map<string, Attendee>();
+    for (const attendee of attendees.values()) {
+      if (attendee.eventId === eventId) {
+        ticketMap.set(attendee.ticketId, attendee);
+      }
+    }
+
+    for (const ticketId of ticketIds) {
+      const attendee = ticketMap.get(ticketId);
+
+      if (!attendee) {
+        failed.push({ ticketId, reason: 'Attendee not found' });
+        continue;
+      }
+
+      if (attendee.status !== 'checked_in') {
+        failed.push({ ticketId, reason: 'Not checked in' });
+        continue;
+      }
+
+      // Update status
+      attendee.checkOutTime = new Date().toISOString();
+      attendee.status = 'checked_out';
+
+      // Calculate duration if needed, keeping it simple for bulk operation
+
+      successful.push(ticketId);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Bulk check-out complete. Success: ${successful.length}, Failed: ${failed.length}`,
+      data: {
+        successfulCount: successful.length,
+        failedCount: failed.length,
+        failedDetails: failed
+      }
+    });
+
+  } catch (error) {
+    console.error('Bulk check-out error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error during bulk check-out'
+    });
+  }
+});
+
 export default router;

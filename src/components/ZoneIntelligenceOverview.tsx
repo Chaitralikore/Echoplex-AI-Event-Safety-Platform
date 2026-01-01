@@ -9,7 +9,7 @@ interface ZoneStats {
 const ZoneIntelligenceOverview: React.FC = () => {
   const [zoneStats, setZoneStats] = useState<ZoneStats | null>(null);
   const [loading, setLoading] = useState(true);
-  
+
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
   const eventId = 'EVT-2024-001';
 
@@ -38,7 +38,8 @@ const ZoneIntelligenceOverview: React.FC = () => {
 
   useEffect(() => {
     fetchZoneData();
-    const interval = setInterval(fetchZoneData, 5000);
+    // Reduced from 5s to 45s for performance with large datasets
+    const interval = setInterval(fetchZoneData, 45000);
     return () => clearInterval(interval);
   }, []);
 
@@ -122,13 +123,12 @@ const ZoneIntelligenceOverview: React.FC = () => {
 
                 <div className="flex items-center justify-between">
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      riskLevel === 'HIGH RISK'
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${riskLevel === 'HIGH RISK'
                         ? 'bg-red-500/20 text-red-400 border border-red-500/30'
                         : riskLevel === 'MEDIUM RISK'
-                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                        : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                    }`}
+                          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                          : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                      }`}
                   >
                     {riskLevel}
                   </span>

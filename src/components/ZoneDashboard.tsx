@@ -37,7 +37,7 @@ const ZoneDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchZoneStats();
-    const interval = setInterval(fetchZoneStats, 5000); // Refresh every 5 seconds
+    const interval = setInterval(fetchZoneStats, 30000); // Refresh every 30 seconds (reduced from 5s for performance)
     return () => clearInterval(interval);
   }, []);
 
