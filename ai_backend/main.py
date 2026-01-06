@@ -295,17 +295,62 @@ async def scan_frame(file: UploadFile = File(...)):
                         if 'reid_vector' not in case_data:
                             continue
                         
-                        # Compute similarity
+                        # Use HYBRID MATCHING with clothing color verification
+                        from color_extractor import color_extractor
                         from reid_extractor import reid_extractor
-                        similarity = reid_extractor.compute_similarity(
+                        
+                        # 1. Re-ID Feature Similarity (50% weight)
+                        reid_similarity = reid_extractor.compute_similarity(
                             case_data['reid_vector'], 
                             features['reid_vector']
                         )
                         
-                        confidence = int(similarity * 100)
+                        # 2. Upper Clothing Color Match (20% weight)
+                        upper_color_score = 0.5  # Default neutral
+                        if 'color_features' in case_data and 'color_features' in features:
+                            upper_color_score = color_extractor.compare_colors(
+                                case_data['color_features']['upper_histogram'],
+                                features['color_features']['upper_histogram']
+                            )
                         
-                        # Only report matches above 60% confidence
-                        if confidence >= 60:
+                        # 3. Lower Clothing Color Match (15% weight)
+                        lower_color_score = 0.5  # Default neutral
+                        if 'color_features' in case_data and 'color_features' in features:
+                            lower_color_score = color_extractor.compare_colors(
+                                case_data['color_features']['lower_histogram'],
+                                features['color_features']['lower_histogram']
+                            )
+                        
+                        # 4. Body Ratio Similarity (15% weight)
+                        case_features = case_data.get('features', {})
+                        case_ratio = case_features.get('body_ratio', 2.5)
+                        detected_ratio = features.get('body_ratio', 2.5)
+                        ratio_diff = abs(case_ratio - detected_ratio)
+                        body_ratio_score = max(0, 1 - ratio_diff / 2)
+                        
+                        # Combined weighted score (same weights as hybrid_matcher)
+                        combined_score = (
+                            reid_similarity * 0.50 +
+                            upper_color_score * 0.20 +
+                            lower_color_score * 0.15 +
+                            body_ratio_score * 0.15
+                        )
+                        
+                        # CRITICAL: Reject if clothing colors are significantly mismatched
+                        # This prevents false positives like white shirt matching blue jacket
+                        color_mismatch = False
+                        if upper_color_score < 0.3:
+                            color_mismatch = True
+                            combined_score *= 0.5  # 50% penalty for upper color mismatch
+                        
+                        if lower_color_score < 0.3:
+                            color_mismatch = True
+                            combined_score *= 0.7  # 30% penalty for lower color mismatch
+                        
+                        confidence = int(combined_score * 100)
+                        
+                        # HIGHER THRESHOLD: Only report matches above 70% confidence (was 60%)
+                        if confidence >= 70:
                             matches.append({
                                 "fullName": case_data['name'],
                                 "case_id": case_id,
@@ -315,6 +360,13 @@ async def scan_frame(file: UploadFile = File(...)):
                                 "detected_colors": {
                                     "upper": features.get('primary_upper', 'unknown'),
                                     "lower": features.get('primary_lower', 'unknown')
+                                },
+                                "match_breakdown": {
+                                    "reid_features": int(reid_similarity * 100),
+                                    "upper_color": int(upper_color_score * 100),
+                                    "lower_color": int(lower_color_score * 100),
+                                    "body_ratio": int(body_ratio_score * 100),
+                                    "color_mismatch_detected": color_mismatch
                                 }
                             })
                 

@@ -725,9 +725,10 @@ const LostAndFound: React.FC = () => {
         photoUrl: ''
       });
       alert('Report submitted successfully!');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error submitting report:', err);
-      alert('Could not submit report');
+      const errorMessage = err?.message || err?.code || 'Unknown error occurred';
+      alert(`Could not submit report: ${errorMessage}`);
     }
   };
 
