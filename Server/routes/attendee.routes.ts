@@ -1,24 +1,44 @@
 // server/routes/attendee.routes.ts
+
 import express, { Request, Response } from 'express';
+
+
 
 const router = express.Router();
 
+
+
 // In-memory storage (replace with database in production)
+
 interface Attendee {
+
   id: string;
+
   name: string;
+
   email: string;
+
   phone: string;
+
   ticketId: string;
+
   checkInTime: string | null;
+
   checkOutTime: string | null;
+
   status: 'not_checked_in' | 'checked_in' | 'checked_out';
+
   location?: string;
+
   eventId: string;
+
 }
+
+
 
 const attendees = new Map<string, Attendee>();
 
+<<<<<<< HEAD
 // Cache for zone stats to improve performance with large datasets
 let zoneStatsCache: {
   eventId: string;
@@ -26,223 +46,451 @@ let zoneStatsCache: {
   timestamp: number;
 } | null = null;
 const CACHE_TTL = 5000; // 5 second cache TTL
+=======
+
+>>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
 
 // POST: Check-in attendee
+
 router.post('/check-in', async (req: Request, res: Response) => {
+
   try {
+
     const { ticketId, eventId, location } = req.body;
 
+
+
     if (!ticketId || !eventId) {
+
       return res.status(400).json({
+
         success: false,
+
         message: 'Ticket ID and Event ID are required'
+
       });
+
     }
+
+
 
     // Find attendee by ticket ID
+
     let attendee = Array.from(attendees.values()).find(
+
       a => a.ticketId === ticketId && a.eventId === eventId
+
     );
 
+
+
     if (!attendee) {
+
       return res.status(404).json({
+
         success: false,
+
         message: 'Attendee not found. Please register first.'
+
       });
+
     }
+
+
 
     if (attendee.status === 'checked_in') {
+
       return res.status(400).json({
+
         success: false,
+
         message: 'Attendee already checked in',
+
         data: {
+
           attendee,
+
           checkInTime: attendee.checkInTime
+
         }
+
       });
+
     }
+
+
 
     // Update check-in status
+
     attendee.checkInTime = new Date().toISOString();
+
     attendee.status = 'checked_in';
+
     attendee.location = location;
+
     attendees.set(attendee.id, attendee);
 
+
+
     return res.status(200).json({
+
       success: true,
+
       message: 'Check-in successful',
+
       data: {
+
         attendee,
+
         checkInTime: attendee.checkInTime
+
       }
+
     });
+
   } catch (error) {
+
     console.error('Check-in error:', error);
+
     return res.status(500).json({
+
       success: false,
+
       message: 'Internal server error during check-in'
+
     });
+
   }
+
 });
+
+
 
 // POST: Check-out attendee
+
 router.post('/check-out', async (req: Request, res: Response) => {
+
   try {
+
     const { ticketId, eventId } = req.body;
 
+
+
     if (!ticketId || !eventId) {
+
       return res.status(400).json({
+
         success: false,
+
         message: 'Ticket ID and Event ID are required'
+
       });
+
     }
+
+
 
     // Find attendee by ticket ID
+
     let attendee = Array.from(attendees.values()).find(
+
       a => a.ticketId === ticketId && a.eventId === eventId
+
     );
 
+
+
     if (!attendee) {
+
       return res.status(404).json({
+
         success: false,
+
         message: 'Attendee not found'
+
       });
+
     }
+
+
 
     if (attendee.status !== 'checked_in') {
+
       return res.status(400).json({
+
         success: false,
+
         message: 'Attendee must be checked in before checking out'
+
       });
+
     }
+
+
 
     // Update check-out status
+
     attendee.checkOutTime = new Date().toISOString();
+
     attendee.status = 'checked_out';
+
     attendees.set(attendee.id, attendee);
 
+
+
     // Calculate duration
+<<<<<<< HEAD
     const duration = new Date(attendee.checkOutTime).getTime() -
       new Date(attendee.checkInTime!).getTime();
+=======
+
+    const duration = new Date(attendee.checkOutTime).getTime() - 
+
+                    new Date(attendee.checkInTime!).getTime();
+
+>>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
     const durationMinutes = Math.floor(duration / 60000);
 
+
+
     return res.status(200).json({
+
       success: true,
+
       message: 'Check-out successful',
+
       data: {
+
         attendee,
+
         checkOutTime: attendee.checkOutTime,
+
         durationMinutes
+
       }
+
     });
+
   } catch (error) {
+
     console.error('Check-out error:', error);
+
     return res.status(500).json({
+
       success: false,
+
       message: 'Internal server error during check-out'
+
     });
+
   }
+
 });
+
+
 
 // GET: Get attendee status
+
 router.get('/status/:ticketId/:eventId', async (req: Request, res: Response) => {
+
   try {
+
     const { ticketId, eventId } = req.params;
 
+
+
     const attendee = Array.from(attendees.values()).find(
+
       a => a.ticketId === ticketId && a.eventId === eventId
+
     );
+
+
 
     if (!attendee) {
+
       return res.status(404).json({
+
         success: false,
+
         message: 'Attendee not found'
+
       });
+
     }
 
+
+
     return res.status(200).json({
+
       success: true,
+
       data: attendee
+
     });
+
   } catch (error) {
+
     console.error('Status check error:', error);
+
     return res.status(500).json({
+
       success: false,
+
       message: 'Internal server error'
+
     });
+
   }
+
 });
+
+
 
 // GET: Get all checked-in attendees for an event
+
 router.get('/checked-in/:eventId', async (req: Request, res: Response) => {
+
   try {
+
     const { eventId } = req.params;
 
+
+
     const checkedInAttendees = Array.from(attendees.values()).filter(
+
       a => a.eventId === eventId && a.status === 'checked_in'
+
     );
 
+
+
     return res.status(200).json({
+
       success: true,
+
       count: checkedInAttendees.length,
+
       data: checkedInAttendees
+
     });
+
   } catch (error) {
+
     console.error('Fetch error:', error);
+
     return res.status(500).json({
+
       success: false,
+
       message: 'Internal server error'
+
     });
+
   }
+
 });
 
+
+
 // POST: Register new attendee (for testing)
+
 router.post('/register', async (req: Request, res: Response) => {
+
   try {
-    const { name, email, phone, ticketId, eventId } = req.body;
+
+    const { name, email, phone, ticketId, eventId, location } = req.body;
+
+
 
     if (!name || !email || !ticketId || !eventId) {
+
       return res.status(400).json({
+
         success: false,
+
         message: 'Name, email, ticket ID, and event ID are required'
+
       });
+
     }
+
+
 
     const id = `ATD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
+<<<<<<< HEAD
+=======
+    
+
+>>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
     const newAttendee: Attendee = {
+
       id,
+
       name,
+
       email,
+
       phone,
+
       ticketId,
+
       eventId,
+
       checkInTime: null,
+
       checkOutTime: null,
-      status: 'not_checked_in'
+
+      status: 'not_checked_in',
+
+      location,
+
     };
+
+
 
     attendees.set(id, newAttendee);
 
+
+
     return res.status(201).json({
+
       success: true,
+
       message: 'Attendee registered successfully',
+
       data: newAttendee
+
     });
+
   } catch (error) {
+
     console.error('Registration error:', error);
+
     return res.status(500).json({
+
       success: false,
+
       message: 'Internal server error during registration'
+
     });
+
   }
+
 });
 
+
+
 // GET: Get zone statistics
+
 router.get('/zones/:eventId', async (req: Request, res: Response) => {
+
   try {
+
     const { eventId } = req.params;
 
+<<<<<<< HEAD
     // Check cache first for performance with large datasets
     const now = Date.now();
     if (zoneStatsCache &&
@@ -254,11 +502,17 @@ router.get('/zones/:eventId', async (req: Request, res: Response) => {
         cached: true
       });
     }
+=======
+    
+>>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
 
     // Get all checked-in attendees for this event
+
     const allAttendees = Array.from(attendees.values())
+
       .filter(a => a.eventId === eventId && a.status === 'checked_in');
 
+<<<<<<< HEAD
     // Standard zone names for normalization (case-insensitive matching)
     const standardZones: Record<string, string> = {
       'main entrance': 'Main Entrance',
@@ -276,10 +530,23 @@ router.get('/zones/:eventId', async (req: Request, res: Response) => {
     // Group attendees by normalized zone/location
     const zoneStats = allAttendees.reduce((acc, attendee) => {
       const zone = normalizeZone(attendee.location || 'Unknown');
+=======
+    
+
+    // Group attendees by zone/location
+
+    const zoneStats = allAttendees.reduce((acc, attendee) => {
+
+      const zone = attendee.location || 'Unknown';
+
+>>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
       acc[zone] = (acc[zone] || 0) + 1;
+
       return acc;
+
     }, {} as Record<string, number>);
 
+<<<<<<< HEAD
     const data = {
       totalCheckedIn: allAttendees.length,
       zones: zoneStats
@@ -287,72 +554,152 @@ router.get('/zones/:eventId', async (req: Request, res: Response) => {
 
     // Update cache
     zoneStatsCache = { eventId, data, timestamp: now };
+=======
+    
+>>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
 
     return res.status(200).json({
+
       success: true,
+<<<<<<< HEAD
       data
+=======
+
+      data: {
+
+        totalCheckedIn: allAttendees.length,
+
+        zones: zoneStats
+
+      }
+
+>>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
     });
+
   } catch (error) {
+
     console.error('Zone stats error:', error);
+
     return res.status(500).json({
+
       success: false,
+
       message: 'Internal server error'
+
     });
+
   }
+
 });
+
+
+
 // POST: Zone-specific check-in with QR code
+
 router.post('/check-in/qr', async (req: Request, res: Response) => {
+
   try {
+
     const { ticketId, eventId, zoneId, zoneName } = req.body;
 
+
+
     // Validate required fields
+
     if (!ticketId || !eventId || !zoneId) {
+
       return res.status(400).json({
+
         success: false,
+
         message: 'Ticket ID, Event ID, and Zone ID are required'
+
       });
+
     }
+
+
 
     // Find the attendee by ticket ID
+
     let attendee = Array.from(attendees.values()).find(
+
       a => a.ticketId === ticketId && a.eventId === eventId
+
     );
 
+
+
     // If attendee not found, return error
+
     if (!attendee) {
+
       return res.status(404).json({
+
         success: false,
+
         message: 'Attendee not found. Please register first.'
+
       });
+
     }
+
+
 
     // Check if already checked in
+
     if (attendee.status === 'checked_in') {
+
       return res.status(400).json({
+
         success: false,
+
         message: 'Already checked in',
+
         data: { attendee }
+
       });
+
     }
 
+
+
     // Record check-in with zone information
+
     attendee.checkInTime = new Date().toISOString();
+
     attendee.status = 'checked_in';
+
     attendee.location = zoneName || zoneId;
+
     attendees.set(attendee.id, attendee);
 
+
+
     return res.status(200).json({
+
       success: true,
+
       message: `Checked in to ${zoneName || zoneId}`,
+
       data: { attendee }
+
     });
+
   } catch (error) {
+
     console.error('QR Check-in error:', error);
+
     return res.status(500).json({
+
       success: false,
+
       message: 'Internal server error'
+
     });
+
   }
+<<<<<<< HEAD
 });
 // DELETE: Clear all attendees for an event (useful before re-importing)
 router.delete('/clear/:eventId', async (req: Request, res: Response) => {
@@ -381,9 +728,73 @@ router.delete('/clear/:eventId', async (req: Request, res: Response) => {
       message: 'Internal server error'
     });
   }
+=======
+
+>>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
 });
 
+
+
+// DELETE: Clear all attendees for an event (useful before re-importing)
+
+router.delete('/clear/:eventId', async (req: Request, res: Response) => {
+
+  try {
+
+    const { eventId } = req.params;
+
+    
+
+    // Find and remove all attendees for this event
+
+    const toDelete: string[] = [];
+
+    attendees.forEach((attendee, id) => {
+
+      if (attendee.eventId === eventId) {
+
+        toDelete.push(id);
+
+      }
+
+    });
+
+    
+
+    toDelete.forEach(id => attendees.delete(id));
+
+    
+
+    return res.status(200).json({
+
+      success: true,
+
+      message: `Cleared ${toDelete.length} attendees for event ${eventId}`,
+
+      data: { deletedCount: toDelete.length }
+
+    });
+
+  } catch (error) {
+
+    console.error('Clear attendees error:', error);
+
+    return res.status(500).json({
+
+      success: false,
+
+      message: 'Internal server error'
+
+    });
+
+  }
+
+});
+
+
+
 // POST: Bulk import attendees from CSV
+// Optimized for large datasets (3000-10k+ attendees)
 router.post('/bulk-import', async (req: Request, res: Response) => {
   try {
     const { attendeeList, eventId } = req.body;
@@ -396,9 +807,15 @@ router.post('/bulk-import', async (req: Request, res: Response) => {
       });
     }
 
-    const imported = [];
-    const failed = [];
+    // Pre-build Set of existing ticketIds for O(1) lookup (optimization for large datasets)
+    const existingTicketIds = new Set<string>();
+    attendees.forEach((attendee) => {
+      if (attendee.eventId === eventId) {
+        existingTicketIds.add(attendee.ticketId.trim().toLowerCase());
+      }
+    });
 
+<<<<<<< HEAD
     // Process each attendee
     for (const attendee of attendeeList) {
       try {
@@ -411,8 +828,81 @@ router.post('/bulk-import', async (req: Request, res: Response) => {
             reason: 'Missing required fields (name, email, or ticketId)'
           });
           continue;
-        }
+=======
+    const imported: Attendee[] = [];
+    const failed: { attendee: any; reason: string }[] = [];
+    const seenInBatch = new Set<string>(); // Track duplicates within the batch
 
+    // Process attendees in batches to avoid blocking
+    const BATCH_SIZE = 500;
+    const totalBatches = Math.ceil(attendeeList.length / BATCH_SIZE);
+
+    for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+      const start = batchIndex * BATCH_SIZE;
+      const end = Math.min(start + BATCH_SIZE, attendeeList.length);
+      const batch = attendeeList.slice(start, end);
+
+      for (const attendee of batch) {
+        try {
+          const { name, email, phone, ticketId, location } = attendee;
+
+          // Validate required fields
+          if (!name || !email || !ticketId || !location) {
+            failed.push({
+              attendee,
+              reason: 'Missing required fields (name, email, ticketId, or location)'
+            });
+            continue;
+          }
+
+          const ticketIdLower = String(ticketId).trim().toLowerCase();
+
+          // Check for duplicates: first in existing data, then in current batch
+          if (existingTicketIds.has(ticketIdLower)) {
+            failed.push({
+              attendee,
+              reason: `Ticket ID ${ticketId} already exists`
+            });
+            continue;
+          }
+
+          if (seenInBatch.has(ticketIdLower)) {
+            failed.push({
+              attendee,
+              reason: `Duplicate Ticket ID ${ticketId} in CSV file`
+            });
+            continue;
+          }
+
+          seenInBatch.add(ticketIdLower);
+          existingTicketIds.add(ticketIdLower); // Add to set to prevent duplicates in same batch
+
+          // Generate unique attendee ID
+          const id = `ATD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+          // Create new attendee
+          const newAttendee: Attendee = {
+            id,
+            name: String(name).trim(),
+            email: String(email).trim(),
+            phone: phone ? String(phone).trim() : '',
+            ticketId: String(ticketId).trim(),
+            eventId,
+            checkInTime: null,
+            checkOutTime: null,
+            status: 'not_checked_in',
+            location: String(location).trim(),
+          };
+
+          attendees.set(id, newAttendee);
+          imported.push(newAttendee);
+        } catch (error) {
+          failed.push({ attendee, reason: 'Processing error' });
+>>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
+        }
+      }
+
+<<<<<<< HEAD
         // Check if ticket ID already exists
         const existingAttendee = Array.from(attendees.values()).find(
           a => a.ticketId === ticketId && a.eventId === eventId
@@ -447,6 +937,11 @@ router.post('/bulk-import', async (req: Request, res: Response) => {
         imported.push(newAttendee);
       } catch (error) {
         failed.push({ attendee, reason: 'Processing error' });
+=======
+      // Allow event loop to process other requests between batches
+      if (batchIndex < totalBatches - 1) {
+        await new Promise((resolve) => setImmediate(resolve));
+>>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
       }
     }
 
@@ -456,7 +951,7 @@ router.post('/bulk-import', async (req: Request, res: Response) => {
       data: {
         imported: imported.length,
         failed: failed.length,
-        failedRecords: failed
+        failedRecords: failed.slice(0, 100) // Limit failed records to first 100 to avoid huge response
       }
     });
   } catch (error) {
@@ -467,6 +962,7 @@ router.post('/bulk-import', async (req: Request, res: Response) => {
     });
   }
 });
+<<<<<<< HEAD
 // POST: Bulk check-in attendees via Ticket IDs
 router.post('/bulk-check-in', async (req: Request, res: Response) => {
   try {
@@ -530,6 +1026,45 @@ router.post('/bulk-check-in', async (req: Request, res: Response) => {
       }
     });
 
+=======
+
+
+
+// POST: Bulk check-in all not_checked_in attendees for an event
+// Uses location already stored on each attendee (from CSV),
+// so zone occupancy reflects CSV locations.
+router.post('/bulk-check-in/:eventId', async (req: Request, res: Response) => {
+  try {
+    const { eventId } = req.params;
+
+    if (!eventId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Event ID is required for bulk check-in'
+      });
+    }
+
+    const now = new Date().toISOString();
+    let updatedCount = 0;
+
+    attendees.forEach((attendee, id) => {
+      if (attendee.eventId === eventId && attendee.status !== 'checked_in') {
+        attendee.checkInTime = now;
+        attendee.status = 'checked_in';
+        // Do not overwrite attendee.location here; keep CSV/existing location
+        attendees.set(id, attendee);
+        updatedCount += 1;
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `Bulk check-in completed. ${updatedCount} attendee(s) updated.`,
+      data: {
+        checkedIn: updatedCount
+      }
+    });
+>>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
   } catch (error) {
     console.error('Bulk check-in error:', error);
     return res.status(500).json({
@@ -539,6 +1074,7 @@ router.post('/bulk-check-in', async (req: Request, res: Response) => {
   }
 });
 
+<<<<<<< HEAD
 // POST: Bulk check-out attendees via Ticket IDs
 router.post('/bulk-check-out', async (req: Request, res: Response) => {
   try {
@@ -604,3 +1140,9 @@ router.post('/bulk-check-out', async (req: Request, res: Response) => {
 });
 
 export default router;
+=======
+
+
+export default router;
+
+>>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb

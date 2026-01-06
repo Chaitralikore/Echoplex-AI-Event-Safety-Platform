@@ -11,8 +11,14 @@ app.use(cors({
   credentials: true
 }));
 
+<<<<<<< HEAD
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+=======
+// Increase body size limit to handle large CSV imports (10k+ attendees)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+>>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
 
 // Logging middleware
 app.use((req, res, next) => {
