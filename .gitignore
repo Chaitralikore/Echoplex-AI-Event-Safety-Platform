@@ -25,9 +25,13 @@ dist-ssr
 
 # Python
 venv/
+ai_backend/venv/
 echoplex-backend/venv/
 __pycache__/
 *.pyc
+*.pt
+*.pth
+*.dat
 
 # Environment / Secrets
 .env

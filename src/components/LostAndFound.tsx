@@ -94,7 +94,6 @@ const LostAndFound: React.FC = () => {
 
   // Video upload state
   const [uploadedVideo, setUploadedVideo] = useState<File | null>(null);
-  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string>('');
   const [isAnalyzingVideo, setIsAnalyzingVideo] = useState(false);
   const [videoAnalysisResult, setVideoAnalysisResult] = useState<{
     likelyLocation: string;
@@ -433,10 +432,7 @@ const LostAndFound: React.FC = () => {
       formData.append('file', blob, 'frame.jpg');
 
       // Use the combined scan endpoint for person detection + face matching
-<<<<<<< HEAD
       // AI backend runs on port 8002
-=======
->>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
       const res = await fetch('http://127.0.0.1:8002/api/scan', {
         method: 'POST',
         body: formData
@@ -914,7 +910,6 @@ const LostAndFound: React.FC = () => {
 
   return (
     <div className="space-y-6">
-<<<<<<< HEAD
       {/* Video Upload (Left) + Live Camera with Analytics (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 
@@ -1156,109 +1151,6 @@ const LostAndFound: React.FC = () => {
               <Camera className="h-4 w-4 text-cyan-400" />
               Live Camera Preview
             </h3>
-=======
-      {/* Live Camera + Upload Video + AI Analytics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* LEFT: Upload Video Preview + controls */}
-        <div className="space-y-4">
-          <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
-            <h3 className="text-sm text-gray-300 mb-2">Upload Video Preview</h3>
-            {videoPreviewUrl ? (
-              <video
-                src={videoPreviewUrl}
-                controls
-                className="w-full rounded-lg bg-black"
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center bg-gray-900/50 rounded-lg py-12">
-                <Camera className="h-12 w-12 text-gray-500 mb-4" />
-                <p className="text-gray-400 mb-2 text-center">
-                  Upload a crowd video to search for missing persons across the scene.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Video Upload Crowd Scan (moved under Upload Video Preview) */}
-          <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 space-y-3">
-            <h4 className="text-sm text-gray-200">Upload Video for Crowd Search</h4>
-            <p className="text-xs text-gray-400">
-              Upload a recording (MP4, MOV, etc.). The system will sample frames and look for any
-              missing persons stored in the database, even in crowded scenes.
-            </p>
-            <input
-              type="file"
-              accept="video/*"
-              onChange={handleVideoFileChange}
-              className="w-full text-sm text-gray-200 file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer bg-gray-900/50 border border-gray-700 rounded-lg px-3 py-2"
-            />
-            <button
-              onClick={handleScanVideo}
-              disabled={!videoFile || isVideoScanning}
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
-            >
-              {isVideoScanning ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Analyzing video...
-                </>
-              ) : (
-                <>
-                  <Camera className="h-4 w-4" />
-                  Scan Video
-                </>
-              )}
-            </button>
-            {videoScanStatus && (
-              <p className="text-xs text-blue-300 bg-blue-900/40 rounded-lg px-3 py-2">
-                {videoScanStatus}
-              </p>
-            )}
-            {videoMatches.length > 0 && (
-              <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
-                {videoMatches.map((m) => (
-                  <div
-                    key={m.caseId}
-                    className="bg-gray-900/80 border border-gray-700 rounded-lg px-3 py-2 text-xs flex items-center gap-3"
-                  >
-                    {m.photoUrl && (
-                      <img
-                        src={m.photoUrl}
-                        alt={m.fullName || 'Matched person photo'}
-                        className="w-12 h-12 rounded object-cover flex-shrink-0 border border-gray-600"
-                      />
-                    )}
-                    <div className="flex-1">
-                      <p className="text-white font-semibold">{m.fullName}</p>
-                      <p className="text-gray-400">
-                        Best confidence: {m.bestConfidence?.toFixed(1) ?? '0.0'}% • Hits: {m.hits ?? 0}
-                      </p>
-                      {m.position && (
-                        <p className="text-gray-500 mt-1">
-                          Likely location:{' '}
-                          <span className="text-blue-300 font-semibold">
-                            {m.position.charAt(0).toUpperCase() + m.position.slice(1)}
-                          </span>{' '}
-                          side of the frame.
-                        </p>
-                      )}
-                      <p className="text-gray-500">
-                        Matching report highlighted as{' '}
-                        <span className="text-yellow-300 font-semibold">Potential Match</span> in the list below.
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* RIGHT: Live Camera Preview + Analytics Dashboard stacked */}
-        <div className="space-y-4">
-          <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
-            <h3 className="text-sm text-gray-300 mb-2">Live Camera Preview</h3>
->>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
             {cameraEnabled ? (
               <div className="space-y-3">
                 <div className="relative">
@@ -1281,62 +1173,48 @@ const LostAndFound: React.FC = () => {
                     </div>
                   )}
                 </div>
-<<<<<<< HEAD
 
-=======
-                
->>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
                 {/* Match Result Display */}
-                {matchResult && (
-                  <div className="bg-gradient-to-r from-green-900/80 to-green-800/80 border-2 border-green-500 rounded-lg p-4 animate-pulse">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <CheckCircle className="h-8 w-8 text-green-400" />
-                        <div>
-                          <p className="text-green-300 text-sm font-medium">MATCH FOUND!</p>
-                          <p className="text-white text-lg font-bold">{matchResult.name}</p>
+                {
+                  matchResult && (
+                    <div className="bg-gradient-to-r from-green-900/80 to-green-800/80 border-2 border-green-500 rounded-lg p-4 animate-pulse">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <CheckCircle className="h-8 w-8 text-green-400" />
+                          <div>
+                            <p className="text-green-300 text-sm font-medium">MATCH FOUND!</p>
+                            <p className="text-white text-lg font-bold">{matchResult.name}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-green-300 text-sm">Confidence</p>
+                          <p className="text-3xl font-bold text-white">{matchResult.confidence}%</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-green-300 text-sm">Confidence</p>
-                        <p className="text-3xl font-bold text-white">{matchResult.confidence}%</p>
-                      </div>
+                      <button
+                        onClick={() => setMatchResult(null)}
+                        className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded text-sm"
+                      >
+                        Dismiss
+                      </button>
                     </div>
-                    <button
-                      onClick={() => setMatchResult(null)}
-                      className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded text-sm"
-                    >
-                      Dismiss
-                    </button>
-                  </div>
-                )}
+                  )
+                }
 
                 {/* Scan Status */}
-                {scanStatus && !matchResult && (
-<<<<<<< HEAD
-                  <div className={`text-sm px-3 py-2 rounded-lg ${scanStatus.includes('MATCH FOUND')
-                    ? 'bg-green-900/50 text-green-300 font-bold'
-                    : scanStatus.includes('error') || scanStatus.includes('not available')
-                      ? 'bg-red-900/50 text-red-300'
-                      : 'bg-blue-900/50 text-blue-300'
-                    }`}>
-                    {scanStatus}
-                  </div>
-                )}
-
-=======
-                  <div className={`text-sm px-3 py-2 rounded-lg ${
-                    scanStatus.includes('MATCH FOUND') 
-                      ? 'bg-green-900/50 text-green-300 font-bold' 
+                {
+                  scanStatus && !matchResult && (
+                    <div className={`text-sm px-3 py-2 rounded-lg ${scanStatus.includes('MATCH FOUND')
+                      ? 'bg-green-900/50 text-green-300 font-bold'
                       : scanStatus.includes('error') || scanStatus.includes('not available')
-                      ? 'bg-red-900/50 text-red-300'
-                      : 'bg-blue-900/50 text-blue-300'
-                  }`}>
-                    {scanStatus}
-                  </div>
-                )}
-                
->>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
+                        ? 'bg-red-900/50 text-red-300'
+                        : 'bg-blue-900/50 text-blue-300'
+                      }`}>
+                      {scanStatus}
+                    </div>
+                  )
+                }
+
                 <div className="flex gap-2">
                   {!isScanning ? (
                     <button
@@ -1365,13 +1243,9 @@ const LostAndFound: React.FC = () => {
                     Close
                   </button>
                 </div>
-              </div>
+              </div >
             ) : (
-<<<<<<< HEAD
               <div className="flex flex-col items-center justify-center bg-gray-900/50 rounded-lg py-12">
-=======
-              <div className="flex flex-col items-center justify-center bg-gray-900/50 rounded-lg py-16">
->>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
                 <Camera className="h-12 w-12 text-gray-500 mb-4" />
                 <p className="text-gray-400 mb-4">Camera is off</p>
                 <button
@@ -1385,21 +1259,15 @@ const LostAndFound: React.FC = () => {
             )}
           </div>
 
-<<<<<<< HEAD
           {/* AI Analytics Dashboard - Below Camera */}
           <div className="grid grid-cols-3 gap-3 relative">
-=======
-          {/* Analytics Dashboard (now under Live Camera) */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative items-start">
->>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
             <button
               onClick={handleResetStats}
               className="absolute -top-2 -right-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs px-2 py-1 rounded z-10"
               title="Reset Stats"
             >
-<<<<<<< HEAD
               Reset
-            </button>
+            </button >
             <div className="bg-gradient-to-br from-blue-900/50 to-blue-800/30 rounded-xl p-4 border border-blue-700/20">
               <div className="flex items-center justify-between">
                 <div>
@@ -1435,10 +1303,10 @@ const LostAndFound: React.FC = () => {
                 <Search className="h-6 w-6 text-yellow-400" />
               </div>
             </div>
-          </div>
+          </div >
 
           {/* Report Missing Person - moved here to fill space */}
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700/50">
+          < div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700/50" >
             <h3 className="text-sm font-semibold mb-3 flex items-center">
               <User className="h-4 w-4 mr-2 text-blue-400" />
               Report Missing Person
@@ -1577,56 +1445,15 @@ const LostAndFound: React.FC = () => {
               >
                 Submit Report & Start AI Search
               </button>
-=======
-              Reset Stats
-            </button>
-            <div className="bg-gradient-to-br from-blue-900/50 to-blue-800/30 rounded-xl px-4 py-5 border border-blue-700/20">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-blue-300">Face Scans</p>
-                  <p className="text-2xl font-bold text-white">
-                    {aiScanResults.totalScans.toLocaleString()}
-                  </p>
-                </div>
-                <Eye className="h-8 w-8 text-blue-400" />
-              </div>
-              <div className="text-sm text-blue-300">Frames analyzed</div>
             </div>
-
-            <div className="bg-gradient-to-br from-green-900/50 to-green-800/30 rounded-xl px-4 py-5 border border-green-700/20">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-green-300">Success Rate</p>
-                  <p className="text-2xl font-bold text-white">
-                    {Math.round(aiScanResults.successRate * 100)}%
-                  </p>
-                </div>
-                <Zap className="h-8 w-8 text-green-400" />
-              </div>
-              <div className="text-sm text-green-300">Accuracy</div>
-            </div>
-
-            <div className="bg-gradient-to-br from-yellow-900/50 to-yellow-800/30 rounded-xl px-4 py-5 border border-yellow-700/20">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-yellow-300">Active Cases</p>
-                  <p className="text-2xl font-bold text-white">
-                    {missingPersons.filter((p) => p.status !== 'found').length}
-                  </p>
-                </div>
-                <Search className="h-8 w-8 text-yellow-400" />
-              </div>
-              <div className="text-sm text-yellow-300">Currently searching</div>
->>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
-            </div>
-          </div>
-        </div>
-      </div>
+          </div >
+        </div >
+      </div >
 
       {/* Search Section - Now standalone */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      < div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start" >
         {/* Search Interface */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
+        < div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50" >
           <h3 className="text-lg font-semibold mb-4 flex items-center">
             <Search className="h-5 w-5 mr-2 text-blue-400" />
             Search Missing Persons
@@ -1644,11 +1471,11 @@ const LostAndFound: React.FC = () => {
           <div className="text-sm text-gray-400">
             {filteredPersons.length} of {missingPersons.length} cases shown
           </div>
-        </div>
-      </div>
+        </div >
+      </div >
 
       {/* Missing Persons List */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
+      < div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50" >
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold flex items-center">
             <AlertCircle className="h-5 w-5 mr-2 text-blue-400" />
@@ -1792,8 +1619,8 @@ const LostAndFound: React.FC = () => {
             );
           })}
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 
