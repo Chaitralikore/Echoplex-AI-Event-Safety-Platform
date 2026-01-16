@@ -23,7 +23,7 @@ services:
     runtime: node
     region: oregon
     plan: free
-    buildCommand: npm install && npm install typescript && npx tsc -p tsconfig.server.json
+    buildCommand: npm install && npm install typescript && ./node_modules/.bin/tsc -p tsconfig.server.json
     startCommand: node Server/Server.js
     envVars:
       - key: NODE_ENV
