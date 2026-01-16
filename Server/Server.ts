@@ -6,19 +6,19 @@ const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
+// Allow CORS from all origins in production (deployed frontend URLs vary)
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['http://localhost:5173', 'http://localhost:5174'];
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://velvety-belekoy-8a22aa.netlify.app'],
+  origin: process.env.NODE_ENV === 'production' ? true : allowedOrigins,
   credentials: true
 }));
 
-<<<<<<< HEAD
+// Increase body size limit to handle large CSV imports (10k+ attendees)
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-=======
-// Increase body size limit to handle large CSV imports (10k+ attendees)
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
->>>>>>> 7fb4a4900d0f088d04c029527320a5d892089ebb
 
 // Logging middleware
 app.use((req, res, next) => {

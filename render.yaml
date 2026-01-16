@@ -1,0 +1,33 @@
+# Render Deployment Configuration for Echoplex
+# See: https://render.com/docs/blueprint-spec
+
+services:
+  # AI Backend (Python FastAPI)
+  - type: web
+    name: echoplex-ai-backend
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: ai_backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.10"
+    healthCheckPath: /health
+    autoDeploy: true
+
+  # Node.js Backend (Express)
+  - type: web
+    name: echoplex-node-backend
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: Server
+    buildCommand: npm install && npx tsc
+    startCommand: node Server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+    healthCheckPath: /health
+    autoDeploy: true

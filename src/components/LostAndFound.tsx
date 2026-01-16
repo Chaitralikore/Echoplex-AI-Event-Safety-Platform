@@ -52,6 +52,10 @@ const videoConstraints = {
 };
 
 const LostAndFound: React.FC = () => {
+  // AI Backend URL - configurable via environment variable for deployment
+  const AI_BACKEND_URL = import.meta.env.VITE_AI_BACKEND_URL || 'http://127.0.0.1:8002';
+  const AI_WS_URL = AI_BACKEND_URL.replace('http', 'ws');
+
   const [missingPersons, setMissingPersons] = useState<MissingPerson[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [cameraEnabled, setCameraEnabled] = useState(false);
@@ -143,7 +147,7 @@ const LostAndFound: React.FC = () => {
   useEffect(() => {
     const connectWebSocket = () => {
       try {
-        const ws = new WebSocket('ws://127.0.0.1:8002/ws/notifications');
+        const ws = new WebSocket(`${AI_WS_URL}/ws/notifications`);
 
         ws.onopen = () => {
           console.log('[WS] Connected to notification server');
@@ -233,7 +237,7 @@ const LostAndFound: React.FC = () => {
 
     setIsAnalyzingVideo(true);
 
-    const AI_BACKEND_URL = 'http://127.0.0.1:8002';
+    // Using component-level AI_BACKEND_URL
     const locations = ['Main Entrance', 'Food Court', 'VIP Section', 'General Area', 'Exit Gate B'];
 
     try {
@@ -352,7 +356,7 @@ const LostAndFound: React.FC = () => {
           '⚠️ AI Backend not available',
           'Make sure the Python AI server is running:',
           'cd ai_backend && pip install -r requirements.txt && python main.py',
-          'Server should be running on http://127.0.0.1:8002'
+          `Server should be running on ${AI_BACKEND_URL}`
         ],
         framesAnalyzed: 0,
         personsDetected: 0,
@@ -380,7 +384,7 @@ const LostAndFound: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch('http://127.0.0.1:8002/api/detect', {
+      const res = await fetch(`${AI_BACKEND_URL}/api/detect`, {
         method: 'POST',
         body: formData
       });
@@ -433,7 +437,7 @@ const LostAndFound: React.FC = () => {
 
       // Use the combined scan endpoint for person detection + face matching
       // AI backend runs on port 8002
-      const res = await fetch('http://127.0.0.1:8002/api/scan', {
+      const res = await fetch(`${AI_BACKEND_URL}/api/scan`, {
         method: 'POST',
         body: formData
       });
@@ -530,7 +534,7 @@ const LostAndFound: React.FC = () => {
       const formData = new FormData();
       formData.append('file', videoFile);
 
-      const res = await fetch('http://127.0.0.1:8002/api/scan-video', {
+      const res = await fetch(`${AI_BACKEND_URL}/api/scan-video`, {
         method: 'POST',
         body: formData
       });
@@ -624,7 +628,7 @@ const LostAndFound: React.FC = () => {
           description: p.description
         }));
 
-        const syncRes = await fetch('http://127.0.0.1:8002/api/sync-cases', {
+        const syncRes = await fetch(`${AI_BACKEND_URL}/api/sync-cases`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(syncData)
@@ -774,7 +778,7 @@ const LostAndFound: React.FC = () => {
         formData.append('referencePhoto', newReport.photoFile);
 
         try {
-          const res = await fetch('http://127.0.0.1:8002/cases', {
+          const res = await fetch(`${AI_BACKEND_URL}/cases`, {
             method: 'POST',
             body: formData
           });
@@ -782,7 +786,7 @@ const LostAndFound: React.FC = () => {
           if (res.ok) {
             const data = await res.json();
             console.log('Case registered with backend for face matching:', data);
-            photoUrl = `http://127.0.0.1:8002/uploads/${data.caseId}`;
+            photoUrl = `${AI_BACKEND_URL}/uploads/${data.caseId}`;
           } else {
             console.warn('Backend registration failed, using base64 fallback');
             // Fallback: convert to base64 for local storage
@@ -1053,7 +1057,7 @@ const LostAndFound: React.FC = () => {
                       onClick={async () => {
                         const matchedCase = missingPersons.find(p => p.name.toLowerCase() === videoAnalysisResult.matchedPerson?.toLowerCase());
                         if (matchedCase) {
-                          await fetch('http://127.0.0.1:8002/api/match-feedback', {
+                          await fetch(`${AI_BACKEND_URL}/api/match-feedback`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -1072,7 +1076,7 @@ const LostAndFound: React.FC = () => {
                       onClick={async () => {
                         const matchedCase = missingPersons.find(p => p.name.toLowerCase() === videoAnalysisResult.matchedPerson?.toLowerCase());
                         if (matchedCase) {
-                          await fetch('http://127.0.0.1:8002/api/match-feedback', {
+                          await fetch(`${AI_BACKEND_URL}/api/match-feedback`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({

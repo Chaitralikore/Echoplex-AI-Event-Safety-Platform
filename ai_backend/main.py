@@ -680,7 +680,10 @@ async def websocket_status():
 
 
 if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 8002))
     print("Starting Echoplex Video Analysis Server v2.0...")
     print("Features: Re-ID Pipeline, WebSocket Notifications, Metadata Search")
     print("Make sure to install dependencies: pip install -r requirements.txt")
-    uvicorn.run(app, host="0.0.0.0", port=8002)
+    print(f"Starting on port {port}...")
+    uvicorn.run(app, host="0.0.0.0", port=port)
