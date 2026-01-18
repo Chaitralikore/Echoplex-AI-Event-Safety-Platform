@@ -7,6 +7,11 @@ interface Zone {
   capacity: number;
 }
 
+interface QRCodeGeneratorProps {
+  value?: string;
+  size?: number;
+}
+
 const zones: Zone[] = [
   { id: 'ZONE-A', name: 'Main Entrance', capacity: 5000 },
   { id: 'ZONE-B', name: 'VIP Section', capacity: 500 },
@@ -14,9 +19,10 @@ const zones: Zone[] = [
   { id: 'ZONE-D', name: 'Food Court', capacity: 2000 },
 ];
 
-const QRCodeGenerator: React.FC = () => {
+const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({ value, size = 200 }) => {
   const [eventId] = useState('EVT-2024-001');
   const [copiedZone, setCopiedZone] = useState<string | null>(null);
+
 
   const generateQRUrl = (zoneId: string, zoneName: string) => {
     const baseUrl = window.location.origin;
@@ -43,6 +49,19 @@ const QRCodeGenerator: React.FC = () => {
     link.download = `${zoneId}-QRCode.png`;
     link.click();
   };
+
+  // If value prop is provided, render a simple QR code image
+  if (value) {
+    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}`;
+    return (
+      <img
+        src={qrImageUrl}
+        alt="QR Code"
+        width={size}
+        height={size}
+      />
+    );
+  }
 
   return (
     <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">

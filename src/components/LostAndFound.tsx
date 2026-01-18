@@ -546,7 +546,7 @@ const LostAndFound: React.FC = () => {
       }
 
       const data = await res.json();
-      const matches: Array<{
+      const rawMatches: Array<{
         caseId: string;
         fullName?: string;
         bestConfidence?: number;
@@ -554,6 +554,15 @@ const LostAndFound: React.FC = () => {
         hits?: number;
         position?: 'left' | 'center' | 'right' | null;
       }> = data.matches || [];
+
+      // Transform to required fields with defaults
+      const matches = rawMatches.map(m => ({
+        caseId: m.caseId,
+        fullName: m.fullName || 'Unknown',
+        bestConfidence: m.bestConfidence || 0,
+        hits: m.hits || 0,
+        photoUrl: m.photoUrl,
+      }));
 
       setVideoScanStatus(
         `Analyzed ${data.frames_analyzed || 0} frames. ${matches.length || 0} potential match(es) found.`
