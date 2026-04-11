@@ -2,7 +2,7 @@
   <img src="https://img.shields.io/badge/Echoplex-AI%20Event%20Safety-00D4FF?style=for-the-badge&logo=shield&logoColor=white" alt="Echoplex">
 </p>
 
-<h1 align="center">🛡️ Echoplex</h1>
+<h1 align="center"> Echoplex</h1>
 <h3 align="center">AI-Powered Event Safety Intelligence Platform</h3>
 
 <p align="center">
