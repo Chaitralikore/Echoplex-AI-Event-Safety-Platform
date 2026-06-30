@@ -324,8 +324,8 @@ const LostAndFound: React.FC = () => {
             ? `Seen in video: ${formatVideoTime(data.matches[0].first_seen)} - ${formatVideoTime(data.matches[0].last_seen)}`
             : `Analyzed at: ${new Date().toLocaleTimeString()}`,
           matchedPerson
-            ? `✅ Face matched with ${matchedPerson}`
-            : ((data.persons_detected || data.faces_detected || 0) > 0 ? '❌ No match with registered cases' : '⚠️ No persons detected in video'),
+            ? `Face matched with ${matchedPerson}`
+            : ((data.persons_detected || data.faces_detected || 0) > 0 ? 'No match with registered cases' : 'No persons detected in video'),
         ],
         framesAnalyzed: data.frames_analyzed || 0,
         personsDetected: data.persons_detected || data.faces_detected || 0,
@@ -353,7 +353,7 @@ const LostAndFound: React.FC = () => {
           lowerClothing: 'Unknown',
         },
         relevantInfo: [
-          '⚠️ AI Backend not available',
+          'AI Backend not available',
           'Make sure the Python AI server is running:',
           'cd ai_backend && pip install -r requirements.txt && python main.py',
           `Server should be running on ${AI_BACKEND_URL}`
@@ -466,7 +466,7 @@ const LostAndFound: React.FC = () => {
       // Check for face matches
       if (matches.length > 0) {
         const topMatch = matches[0];
-        setScanStatus(`🎯 MATCH FOUND: ${topMatch.fullName} (${topMatch.confidence}% confidence)`);
+        setScanStatus(`MATCH FOUND: ${topMatch.fullName} (${topMatch.confidence}% confidence)`);
 
         // Store match result for display
         setMatchResult({
@@ -585,7 +585,7 @@ const LostAndFound: React.FC = () => {
         await runTransaction(matchesRef, (current) => (current || 0) + matches.length);
       }
 
-      // For each matched person, update their status in Firebase to \"potential-match\"
+      // For each matched person, update their status in Firebase to "potential-match"
       for (const match of matches) {
         const name = (match.fullName || '').toLowerCase();
         if (!name) continue;
@@ -928,16 +928,16 @@ const LostAndFound: React.FC = () => {
 
         {/* LEFT COLUMN: Video Upload + Analysis */}
         <div className="space-y-4">
-          <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
+          <div className="bg-surface rounded-xl p-4 border border-surfaceHover">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm text-gray-300 flex items-center gap-2">
-                <Video className="h-4 w-4 text-purple-400" />
+              <h3 className="text-sm text-textSecondary flex items-center gap-2">
+                <Video className="h-4 w-4 text-accent" />
                 CCTV Video Analysis
               </h3>
               {uploadedVideo && (
                 <button
                   onClick={clearUploadedVideo}
-                  className="text-gray-400 hover:text-red-400 transition-colors"
+                  className="text-textSecondary hover:text-red-400 transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -957,11 +957,11 @@ const LostAndFound: React.FC = () => {
                   <button
                     onClick={analyzeVideo}
                     disabled={isAnalyzingVideo}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 text-white py-2 px-4 rounded-lg transition-all flex items-center justify-center"
+                    className="flex-1 bg-accent hover:bg-accent/80 disabled:opacity-50 text-black font-semibold py-2 px-4 rounded-lg transition-all flex items-center justify-center"
                   >
                     {isAnalyzingVideo ? (
                       <>
-                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                        <div className="animate-spin w-4 h-4 border-2 border-black border-t-transparent rounded-full mr-2" />
                         Analyzing...
                       </>
                     ) : (
@@ -974,10 +974,10 @@ const LostAndFound: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center bg-gray-900/50 rounded-lg py-12 cursor-pointer hover:bg-gray-900/70 transition-colors border-2 border-dashed border-gray-600 hover:border-purple-500">
-                <Upload className="h-10 w-10 text-gray-500 mb-3" />
-                <p className="text-gray-400 mb-1">Upload CCTV Footage</p>
-                <p className="text-gray-500 text-xs">MP4, WebM, AVI supported</p>
+              <label className="flex flex-col items-center justify-center bg-base rounded-lg py-12 cursor-pointer hover:bg-surfaceHover transition-colors border-2 border-dashed border-surfaceHover hover:border-accent">
+                <Upload className="h-10 w-10 text-textSecondary mb-3" />
+                <p className="text-textSecondary mb-1">Upload CCTV Footage</p>
+                <p className="text-textSecondary text-xs">MP4, WebM, AVI supported</p>
                 <input
                   type="file"
                   accept="video/*"
@@ -990,77 +990,77 @@ const LostAndFound: React.FC = () => {
 
           {/* Video Analysis Results */}
           {videoAnalysisResult && (
-            <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 space-y-4">
-              <h4 className="text-sm font-medium text-white flex items-center gap-2">
-                <Eye className="h-4 w-4 text-cyan-400" />
+            <div className="bg-surface rounded-xl p-4 border border-surfaceHover space-y-4">
+              <h4 className="text-sm font-medium text-textPrimary flex items-center gap-2">
+                <Eye className="h-4 w-4 text-accent" />
                 Analysis Results
               </h4>
 
-              {/* Match Result */}
+              {/* Match Result - keeps semantic green, this is a success state */}
               {videoAnalysisResult.matchedPerson && (
-                <div className="bg-gradient-to-r from-green-900/60 to-green-800/40 rounded-lg p-3 border border-green-500/50">
+                <div className="bg-green-900/30 rounded-lg p-3 border border-green-500/40">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-green-400" />
                       <span className="text-green-300 font-medium">Potential Match Found</span>
                       {videoAnalysisResult.superVectorUsed && (
-                        <span className="text-xs bg-purple-600/50 px-2 py-0.5 rounded text-purple-200">Super-Vector</span>
+                        <span className="text-xs bg-accent/30 px-2 py-0.5 rounded text-accent">Super-Vector</span>
                       )}
                     </div>
-                    <span className="text-2xl font-bold text-white">{videoAnalysisResult.matchConfidence}%</span>
+                    <span className="text-2xl font-bold text-textPrimary">{videoAnalysisResult.matchConfidence}%</span>
                   </div>
-                  <p className="text-white mt-1 font-semibold">{videoAnalysisResult.matchedPerson}</p>
+                  <p className="text-textPrimary mt-1 font-semibold">{videoAnalysisResult.matchedPerson}</p>
 
-                  {/* Confidence Breakdown */}
+                  {/* Confidence Breakdown - distinct colors kept intentionally, each bar represents a different data category */}
                   {videoAnalysisResult.confidenceBreakdown && (
-                    <div className="mt-3 pt-3 border-t border-green-700/50">
+                    <div className="mt-3 pt-3 border-t border-green-700/30">
                       <p className="text-green-300 text-xs mb-2 font-medium">Confidence Breakdown:</p>
                       <div className="space-y-1.5">
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-400 text-xs w-24">Re-ID Features</span>
-                          <div className="flex-1 bg-gray-700 rounded-full h-2">
+                          <span className="text-textSecondary text-xs w-24">Re-ID Features</span>
+                          <div className="flex-1 bg-surfaceHover rounded-full h-2">
                             <div
                               className="bg-blue-500 h-2 rounded-full transition-all"
                               style={{ width: `${videoAnalysisResult.confidenceBreakdown.reid_features}%` }}
                             />
                           </div>
-                          <span className="text-white text-xs w-10">{videoAnalysisResult.confidenceBreakdown.reid_features}%</span>
+                          <span className="text-textPrimary text-xs w-10">{videoAnalysisResult.confidenceBreakdown.reid_features}%</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-400 text-xs w-24">Upper Clothing</span>
-                          <div className="flex-1 bg-gray-700 rounded-full h-2">
+                          <span className="text-textSecondary text-xs w-24">Upper Clothing</span>
+                          <div className="flex-1 bg-surfaceHover rounded-full h-2">
                             <div
                               className="bg-orange-500 h-2 rounded-full transition-all"
                               style={{ width: `${videoAnalysisResult.confidenceBreakdown.upper_clothing}%` }}
                             />
                           </div>
-                          <span className="text-white text-xs w-10">{videoAnalysisResult.confidenceBreakdown.upper_clothing}%</span>
+                          <span className="text-textPrimary text-xs w-10">{videoAnalysisResult.confidenceBreakdown.upper_clothing}%</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-400 text-xs w-24">Lower Clothing</span>
-                          <div className="flex-1 bg-gray-700 rounded-full h-2">
+                          <span className="text-textSecondary text-xs w-24">Lower Clothing</span>
+                          <div className="flex-1 bg-surfaceHover rounded-full h-2">
                             <div
                               className="bg-cyan-500 h-2 rounded-full transition-all"
                               style={{ width: `${videoAnalysisResult.confidenceBreakdown.lower_clothing}%` }}
                             />
                           </div>
-                          <span className="text-white text-xs w-10">{videoAnalysisResult.confidenceBreakdown.lower_clothing}%</span>
+                          <span className="text-textPrimary text-xs w-10">{videoAnalysisResult.confidenceBreakdown.lower_clothing}%</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-400 text-xs w-24">Body Shape</span>
-                          <div className="flex-1 bg-gray-700 rounded-full h-2">
+                          <span className="text-textSecondary text-xs w-24">Body Shape</span>
+                          <div className="flex-1 bg-surfaceHover rounded-full h-2">
                             <div
                               className="bg-purple-500 h-2 rounded-full transition-all"
                               style={{ width: `${videoAnalysisResult.confidenceBreakdown.body_shape}%` }}
                             />
                           </div>
-                          <span className="text-white text-xs w-10">{videoAnalysisResult.confidenceBreakdown.body_shape}%</span>
+                          <span className="text-textPrimary text-xs w-10">{videoAnalysisResult.confidenceBreakdown.body_shape}%</span>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Feedback Buttons */}
+                  {/* Feedback Buttons - green=confirm, red=reject, both functional */}
                   <div className="mt-3 flex gap-2">
                     <button
                       onClick={async () => {
@@ -1104,38 +1104,38 @@ const LostAndFound: React.FC = () => {
               )}
 
               {/* Likely Location */}
-              <div className="bg-gray-700/50 rounded-lg p-3">
+              <div className="bg-base rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="h-4 w-4 text-amber-400" />
-                  <span className="text-gray-300 text-sm">Likely Location</span>
+                  <MapPin className="h-4 w-4 text-accent" />
+                  <span className="text-textSecondary text-sm">Likely Location</span>
                 </div>
-                <p className="text-white font-medium">{videoAnalysisResult.likelyLocation}</p>
+                <p className="text-textPrimary font-medium">{videoAnalysisResult.likelyLocation}</p>
               </div>
 
               {/* Detected Person Details */}
-              <div className="bg-gray-700/50 rounded-lg p-3">
+              <div className="bg-base rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <User className="h-4 w-4 text-blue-400" />
-                  <span className="text-gray-300 text-sm">Detected Person Details</span>
+                  <User className="h-4 w-4 text-accent" />
+                  <span className="text-textSecondary text-sm">Detected Person Details</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div><span className="text-gray-400">Gender:</span> <span className="text-white">{videoAnalysisResult.detectedDetails.gender}</span></div>
-                  <div><span className="text-gray-400">Age:</span> <span className="text-white">{videoAnalysisResult.detectedDetails.estimatedAge}</span></div>
-                  <div><span className="text-gray-400">Top:</span> <span className="text-white">{videoAnalysisResult.detectedDetails.upperClothing}</span></div>
-                  <div><span className="text-gray-400">Bottom:</span> <span className="text-white">{videoAnalysisResult.detectedDetails.lowerClothing}</span></div>
+                  <div><span className="text-textSecondary">Gender:</span> <span className="text-textPrimary">{videoAnalysisResult.detectedDetails.gender}</span></div>
+                  <div><span className="text-textSecondary">Age:</span> <span className="text-textPrimary">{videoAnalysisResult.detectedDetails.estimatedAge}</span></div>
+                  <div><span className="text-textSecondary">Top:</span> <span className="text-textPrimary">{videoAnalysisResult.detectedDetails.upperClothing}</span></div>
+                  <div><span className="text-textSecondary">Bottom:</span> <span className="text-textPrimary">{videoAnalysisResult.detectedDetails.lowerClothing}</span></div>
                 </div>
               </div>
 
               {/* Relevant Info */}
-              <div className="bg-gray-700/50 rounded-lg p-3">
+              <div className="bg-base rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <AlertCircle className="h-4 w-4 text-cyan-400" />
-                  <span className="text-gray-300 text-sm">Relevant Information</span>
+                  <AlertCircle className="h-4 w-4 text-accent" />
+                  <span className="text-textSecondary text-sm">Relevant Information</span>
                 </div>
                 <ul className="text-sm space-y-1">
                   {videoAnalysisResult.relevantInfo.map((info, idx) => (
-                    <li key={idx} className="text-gray-300 flex items-start gap-2">
-                      <span className="text-cyan-400">•</span> {info}
+                    <li key={idx} className="text-textSecondary flex items-start gap-2">
+                      <span className="text-accent">•</span> {info}
                     </li>
                   ))}
                 </ul>
@@ -1143,13 +1143,13 @@ const LostAndFound: React.FC = () => {
 
               {/* Stats */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-blue-900/30 rounded-lg p-2 text-center">
-                  <p className="text-xl font-bold text-white">{videoAnalysisResult.framesAnalyzed}</p>
-                  <p className="text-xs text-blue-300">Frames Analyzed</p>
+                <div className="bg-base rounded-lg p-2 text-center border border-surfaceHover">
+                  <p className="text-xl font-bold text-textPrimary">{videoAnalysisResult.framesAnalyzed}</p>
+                  <p className="text-xs text-textSecondary">Frames Analyzed</p>
                 </div>
-                <div className="bg-green-900/30 rounded-lg p-2 text-center">
-                  <p className="text-xl font-bold text-white">{videoAnalysisResult.personsDetected}</p>
-                  <p className="text-xs text-green-300">Persons Detected</p>
+                <div className="bg-base rounded-lg p-2 text-center border border-surfaceHover">
+                  <p className="text-xl font-bold text-textPrimary">{videoAnalysisResult.personsDetected}</p>
+                  <p className="text-xs text-textSecondary">Persons Detected</p>
                 </div>
               </div>
             </div>
@@ -1159,9 +1159,9 @@ const LostAndFound: React.FC = () => {
         {/* RIGHT COLUMN: Live Camera + Analytics */}
         <div className="space-y-4">
           {/* Live Camera Preview */}
-          <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
-            <h3 className="text-sm text-gray-300 mb-2 flex items-center gap-2">
-              <Camera className="h-4 w-4 text-cyan-400" />
+          <div className="bg-surface rounded-xl p-4 border border-surfaceHover">
+            <h3 className="text-sm text-textSecondary mb-2 flex items-center gap-2">
+              <Camera className="h-4 w-4 text-accent" />
               Live Camera Preview
             </h3>
             {cameraEnabled ? (
@@ -1187,21 +1187,21 @@ const LostAndFound: React.FC = () => {
                   )}
                 </div>
 
-                {/* Match Result Display */}
+                {/* Match Result Display - kept green/success semantics */}
                 {
                   matchResult && (
-                    <div className="bg-gradient-to-r from-green-900/80 to-green-800/80 border-2 border-green-500 rounded-lg p-4 animate-pulse">
+                    <div className="bg-green-900/40 border-2 border-green-500 rounded-lg p-4 animate-pulse">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                           <CheckCircle className="h-8 w-8 text-green-400" />
                           <div>
                             <p className="text-green-300 text-sm font-medium">MATCH FOUND!</p>
-                            <p className="text-white text-lg font-bold">{matchResult.name}</p>
+                            <p className="text-textPrimary text-lg font-bold">{matchResult.name}</p>
                           </div>
                         </div>
                         <div className="text-right">
                           <p className="text-green-300 text-sm">Confidence</p>
-                          <p className="text-3xl font-bold text-white">{matchResult.confidence}%</p>
+                          <p className="text-3xl font-bold text-textPrimary">{matchResult.confidence}%</p>
                         </div>
                       </div>
                       <button
@@ -1218,10 +1218,10 @@ const LostAndFound: React.FC = () => {
                 {
                   scanStatus && !matchResult && (
                     <div className={`text-sm px-3 py-2 rounded-lg ${scanStatus.includes('MATCH FOUND')
-                      ? 'bg-green-900/50 text-green-300 font-bold'
+                      ? 'bg-green-900/40 text-green-300 font-bold'
                       : scanStatus.includes('error') || scanStatus.includes('not available')
-                        ? 'bg-red-900/50 text-red-300'
-                        : 'bg-blue-900/50 text-blue-300'
+                        ? 'bg-red-900/40 text-red-300'
+                        : 'bg-base text-accent'
                       }`}>
                       {scanStatus}
                     </div>
@@ -1232,7 +1232,7 @@ const LostAndFound: React.FC = () => {
                   {!isScanning ? (
                     <button
                       onClick={startScanning}
-                      className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-2 px-4 rounded-lg transition-all flex items-center justify-center"
+                      className="flex-1 bg-accent hover:bg-accent/80 text-black font-semibold py-2 px-4 rounded-lg transition-all flex items-center justify-center"
                     >
                       <Zap className="h-4 w-4 mr-2" />
                       Start Scan
@@ -1240,7 +1240,7 @@ const LostAndFound: React.FC = () => {
                   ) : (
                     <button
                       onClick={stopScanning}
-                      className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2 px-4 rounded-lg transition-all flex items-center justify-center"
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-all flex items-center justify-center"
                     >
                       <StopCircle className="h-4 w-4 mr-2" />
                       Stop Scan
@@ -1251,19 +1251,19 @@ const LostAndFound: React.FC = () => {
                       stopScanning();
                       setCameraEnabled(false);
                     }}
-                    className="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition-colors"
+                    className="bg-surfaceHover hover:bg-surfaceHover/70 text-textPrimary py-2 px-4 rounded-lg transition-colors"
                   >
                     Close
                   </button>
                 </div>
               </div >
             ) : (
-              <div className="flex flex-col items-center justify-center bg-gray-900/50 rounded-lg py-12">
-                <Camera className="h-12 w-12 text-gray-500 mb-4" />
-                <p className="text-gray-400 mb-4">Camera is off</p>
+              <div className="flex flex-col items-center justify-center bg-base rounded-lg py-12">
+                <Camera className="h-12 w-12 text-textSecondary mb-4" />
+                <p className="text-textSecondary mb-4">Camera is off</p>
                 <button
                   onClick={() => setCameraEnabled(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
+                  className="bg-accent hover:bg-accent/80 text-black font-semibold px-4 py-2 rounded-lg transition-colors flex items-center"
                 >
                   <Camera className="h-4 w-4 mr-2" />
                   Start Camera
@@ -1276,52 +1276,52 @@ const LostAndFound: React.FC = () => {
           <div className="grid grid-cols-3 gap-3 relative">
             <button
               onClick={handleResetStats}
-              className="absolute -top-2 -right-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs px-2 py-1 rounded z-10"
+              className="absolute -top-2 -right-2 bg-surfaceHover hover:bg-surfaceHover/70 text-textSecondary text-xs px-2 py-1 rounded z-10"
               title="Reset Stats"
             >
               Reset
             </button >
-            <div className="bg-gradient-to-br from-blue-900/50 to-blue-800/30 rounded-xl p-4 border border-blue-700/20">
+            <div className="bg-surface rounded-xl p-4 border border-surfaceHover">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-blue-300">Face Scans</p>
-                  <p className="text-xl font-bold text-white">
+                  <p className="text-xs text-textSecondary">Face Scans</p>
+                  <p className="text-xl font-bold text-textPrimary">
                     {aiScanResults.totalScans.toLocaleString()}
                   </p>
                 </div>
-                <Eye className="h-6 w-6 text-blue-400" />
+                <Eye className="h-6 w-6 text-accent" />
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-green-900/50 to-green-800/30 rounded-xl p-4 border border-green-700/20">
+            <div className="bg-surface rounded-xl p-4 border border-surfaceHover">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-green-300">Success Rate</p>
-                  <p className="text-xl font-bold text-white">
+                  <p className="text-xs text-textSecondary">Success Rate</p>
+                  <p className="text-xl font-bold text-textPrimary">
                     {Math.round(aiScanResults.successRate * 100)}%
                   </p>
                 </div>
-                <Zap className="h-6 w-6 text-green-400" />
+                <Zap className="h-6 w-6 text-accent" />
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-yellow-900/50 to-yellow-800/30 rounded-xl p-4 border border-yellow-700/20">
+            <div className="bg-surface rounded-xl p-4 border border-surfaceHover">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-yellow-300">Active Cases</p>
-                  <p className="text-xl font-bold text-white">
+                  <p className="text-xs text-textSecondary">Active Cases</p>
+                  <p className="text-xl font-bold text-textPrimary">
                     {missingPersons.filter((p) => p.status !== 'found').length}
                   </p>
                 </div>
-                <Search className="h-6 w-6 text-yellow-400" />
+                <Search className="h-6 w-6 text-accent" />
               </div>
             </div>
           </div >
 
           {/* Report Missing Person - moved here to fill space */}
-          < div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700/50" >
-            <h3 className="text-sm font-semibold mb-3 flex items-center">
-              <User className="h-4 w-4 mr-2 text-blue-400" />
+          < div className="bg-surface backdrop-blur-sm rounded-xl p-4 border border-surfaceHover" >
+            <h3 className="text-sm font-semibold mb-3 flex items-center text-textPrimary">
+              <User className="h-4 w-4 mr-2 text-accent" />
               Report Missing Person
             </h3>
             <div className="space-y-2">
@@ -1329,7 +1329,7 @@ const LostAndFound: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Full Name"
-                  className="bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="bg-base border border-surfaceHover rounded-lg px-3 py-2 text-sm text-textPrimary placeholder-textSecondary focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                   value={newReport.name}
                   onChange={(e) =>
                     setNewReport((prev) => ({ ...prev, name: e.target.value }))
@@ -1338,7 +1338,7 @@ const LostAndFound: React.FC = () => {
                 <input
                   type="number"
                   placeholder="Age"
-                  className="bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="bg-base border border-surfaceHover rounded-lg px-3 py-2 text-sm text-textPrimary placeholder-textSecondary focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                   value={newReport.age}
                   onChange={(e) =>
                     setNewReport((prev) => ({ ...prev, age: e.target.value }))
@@ -1347,7 +1347,7 @@ const LostAndFound: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <select
-                  className="bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="bg-base border border-surfaceHover rounded-lg px-3 py-2 text-sm text-textPrimary focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                   value={newReport.gender}
                   onChange={(e) =>
                     setNewReport((prev) => ({
@@ -1362,7 +1362,7 @@ const LostAndFound: React.FC = () => {
                   <option value="other">Other</option>
                 </select>
                 <select
-                  className="bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="bg-base border border-surfaceHover rounded-lg px-3 py-2 text-sm text-textPrimary focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                   value={newReport.heightRange}
                   onChange={(e) =>
                     setNewReport((prev) => ({ ...prev, heightRange: e.target.value }))
@@ -1378,7 +1378,7 @@ const LostAndFound: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Top color"
-                  className="bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="bg-base border border-surfaceHover rounded-lg px-3 py-2 text-sm text-textPrimary placeholder-textSecondary focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                   value={newReport.upperClothingColor}
                   onChange={(e) =>
                     setNewReport((prev) => ({
@@ -1390,7 +1390,7 @@ const LostAndFound: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Bottom color"
-                  className="bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="bg-base border border-surfaceHover rounded-lg px-3 py-2 text-sm text-textPrimary placeholder-textSecondary focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                   value={newReport.lowerClothingColor}
                   onChange={(e) =>
                     setNewReport((prev) => ({
@@ -1403,7 +1403,7 @@ const LostAndFound: React.FC = () => {
               <input
                 type="text"
                 placeholder="Description (features, last seen location)"
-                className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full bg-base border border-surfaceHover rounded-lg px-3 py-2 text-sm text-textPrimary placeholder-textSecondary focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                 value={newReport.description}
                 onChange={(e) =>
                   setNewReport((prev) => ({
@@ -1416,7 +1416,7 @@ const LostAndFound: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Last Seen Location"
-                  className="bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="bg-base border border-surfaceHover rounded-lg px-3 py-2 text-sm text-textPrimary placeholder-textSecondary focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                   value={newReport.lastSeen}
                   onChange={(e) =>
                     setNewReport((prev) => ({
@@ -1428,7 +1428,7 @@ const LostAndFound: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Reported By"
-                  className="bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="bg-base border border-surfaceHover rounded-lg px-3 py-2 text-sm text-textPrimary placeholder-textSecondary focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                   value={newReport.reportedBy}
                   onChange={(e) =>
                     setNewReport((prev) => ({
@@ -1439,13 +1439,13 @@ const LostAndFound: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">
+                <label className="text-xs text-textSecondary mb-1 block">
                   Reference Photo
                 </label>
                 <input
                   type="file"
                   accept="image/*"
-                  className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-2 py-1 text-sm text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full bg-base border border-surfaceHover rounded-lg px-2 py-1 text-sm text-textPrimary focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
                     setNewReport((prev) => ({ ...prev, photoFile: file }));
@@ -1454,7 +1454,7 @@ const LostAndFound: React.FC = () => {
               </div>
               <button
                 onClick={handleSubmitReport}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-2 px-4 rounded-lg text-sm transition-all duration-200 transform hover:scale-[1.02]"
+                className="w-full bg-accent hover:bg-accent/80 text-black font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-200 transform hover:scale-[1.02]"
               >
                 Submit Report & Start AI Search
               </button>
@@ -1466,35 +1466,35 @@ const LostAndFound: React.FC = () => {
       {/* Search Section - Now standalone */}
       < div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start" >
         {/* Search Interface */}
-        < div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50" >
-          <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <Search className="h-5 w-5 mr-2 text-blue-400" />
+        < div className="bg-surface backdrop-blur-sm rounded-xl p-6 border border-surfaceHover" >
+          <h3 className="text-lg font-semibold mb-4 flex items-center text-textPrimary">
+            <Search className="h-5 w-5 mr-2 text-accent" />
             Search Missing Persons
           </h3>
           <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-textSecondary" />
             <input
               type="text"
               placeholder="Search by name, clothing color, or description..."
-              className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full pl-10 pr-4 py-3 bg-base border border-surfaceHover rounded-lg text-textPrimary placeholder-textSecondary focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <div className="text-sm text-gray-400">
+          <div className="text-sm text-textSecondary">
             {filteredPersons.length} of {missingPersons.length} cases shown
           </div>
         </div >
       </div >
 
       {/* Missing Persons List */}
-      < div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50" >
+      < div className="bg-surface backdrop-blur-sm rounded-xl p-6 border border-surfaceHover" >
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold flex items-center">
-            <AlertCircle className="h-5 w-5 mr-2 text-blue-400" />
+          <h3 className="text-lg font-semibold flex items-center text-textPrimary">
+            <AlertCircle className="h-5 w-5 mr-2 text-accent" />
             Active Missing Persons Cases
           </h3>
-          <div className="text-sm text-gray-400">
+          <div className="text-sm text-textSecondary">
             AI facial recognition active on{' '}
             {missingPersons.filter((p) => p.status !== 'found').length} cases
           </div>
@@ -1506,7 +1506,7 @@ const LostAndFound: React.FC = () => {
             return (
               <div
                 key={person.id}
-                className="bg-gray-700/30 rounded-xl p-6 border border-gray-600/30 hover:border-gray-500/50 transition-all"
+                className="bg-base rounded-xl p-6 border border-surfaceHover hover:border-accent/40 transition-all"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-start space-x-4">
@@ -1516,16 +1516,16 @@ const LostAndFound: React.FC = () => {
                         <img
                           src={person.photoUrl}
                           alt={`${person.name}'s photo`}
-                          className="w-16 h-16 rounded-lg object-cover border-2 border-gray-600"
+                          className="w-16 h-16 rounded-lg object-cover border-2 border-surfaceHover"
                         />
                       </div>
                     )}
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
-                        <h4 className="text-lg font-semibold text-white">
+                        <h4 className="text-lg font-semibold text-textPrimary">
                           {person.name}
                         </h4>
-                        <span className="text-sm text-gray-400">
+                        <span className="text-sm text-textSecondary">
                           Age {person.age}
                         </span>
                         <span
@@ -1537,7 +1537,7 @@ const LostAndFound: React.FC = () => {
                         </span>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400 mb-1">
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-textSecondary mb-1">
                         {person.gender && <span>Gender: {person.gender}</span>}
                         {person.heightRange && (
                           <span>Height: {person.heightRange}</span>
@@ -1557,10 +1557,10 @@ const LostAndFound: React.FC = () => {
                         )}
                       </div>
 
-                      <p className="text-gray-300 mb-2">
+                      <p className="text-textSecondary mb-2">
                         {person.description}
                       </p>
-                      <div className="flex items-center space-x-4 text-sm text-gray-400">
+                      <div className="flex items-center space-x-4 text-sm text-textSecondary">
                         <div className="flex items-center">
                           <MapPin className="h-4 w-4 mr-1" />
                           Last seen: {person.lastSeen}
@@ -1572,11 +1572,11 @@ const LostAndFound: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <StatusIcon className="h-6 w-6 text-blue-400" />
+                  <StatusIcon className="h-6 w-6 text-accent" />
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-400">
+                  <div className="text-sm text-textSecondary">
                     Reported by: {person.reportedBy}
                   </div>
                   <div className="flex space-x-2">
@@ -1594,7 +1594,7 @@ const LostAndFound: React.FC = () => {
                           onClick={() =>
                             handleStatusUpdate(person.id, 'searching')
                           }
-                          className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                          className="bg-surfaceHover hover:bg-surfaceHover/70 text-textPrimary px-4 py-2 rounded-lg text-sm transition-colors"
                         >
                           False Match
                         </button>
@@ -1614,7 +1614,7 @@ const LostAndFound: React.FC = () => {
                           onClick={() =>
                             handleStatusUpdate(person.id, 'found')
                           }
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                          className="bg-accent hover:bg-accent/80 text-black font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
                         >
                           Mark as Found
                         </button>
