@@ -68,11 +68,8 @@ const BulkImport: React.FC = () => {
     }
   };
 
-  // Normalize header text so we can accept variants like
-  // "S. No.", "S No", "email_ID", "Ticket_Id", etc.
   const normalizeHeader = (raw: string) => {
     const cleaned = raw.toLowerCase().replace(/\./g, '').replace(/[_\s]/g, '');
-    // Treat "email_id" and similar as "email"
     if (cleaned === 'emailid') return 'email';
     return cleaned;
   };
@@ -86,7 +83,6 @@ const BulkImport: React.FC = () => {
 
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[\s_]/g, ''));
 
-    // Map various column name formats to standard names
     const columnMap: Record<string, string> = {
       'name': 'name',
       'email': 'email',
@@ -104,10 +100,8 @@ const BulkImport: React.FC = () => {
       'serialno': 'sno'
     };
 
-    // Normalize headers
     const normalizedHeaders = headers.map(h => columnMap[h] || h);
 
-    // Validate required headers (name, email, ticketId)
     const hasName = normalizedHeaders.includes('name');
     const hasEmail = normalizedHeaders.includes('email');
     const hasTicketId = normalizedHeaders.includes('ticketId');
@@ -125,7 +119,7 @@ const BulkImport: React.FC = () => {
       const attendee: any = {};
 
       normalizedHeaders.forEach((header, index) => {
-        if (header !== 'sno') { // Skip serial number column
+        if (header !== 'sno') {
           attendee[header] = values[index] || '';
         }
       });
@@ -151,7 +145,7 @@ const BulkImport: React.FC = () => {
 
     try {
       const text = await file.text();
-      const rows = parseCSV(text); // validation happens here
+      const rows = parseCSV(text);
       let endpoint = '';
       let body: any = { eventId };
 
@@ -176,10 +170,6 @@ const BulkImport: React.FC = () => {
 
       const data = await response.json();
       setResult(data);
-
-      if (data.success && action === 'import') {
-        // Keep file selected for flexibility - user can do Import -> CheckIn sequence
-      }
     } catch (error: any) {
       setResult({
         success: false,
@@ -224,21 +214,21 @@ const BulkImport: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+    <div className="bg-surface rounded-xl p-6 border border-surfaceHover">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-          <Upload className="w-6 h-6 text-white" />
+        <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
+          <Upload className="w-6 h-6 text-black" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-white">Bulk Import Attendees</h2>
-          <p className="text-slate-400 text-sm">Upload CSV file to register multiple attendees at once</p>
+          <h2 className="text-xl font-semibold text-textPrimary">Bulk Import Attendees</h2>
+          <p className="text-textSecondary text-sm">Upload CSV file to register multiple attendees at once</p>
         </div>
       </div>
 
       {/* File Upload */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-slate-300 mb-2">
+        <label className="block text-sm font-medium text-textSecondary mb-2">
           Upload Attendee List (CSV File)
         </label>
         <div className="flex flex-wrap gap-3 w-full">
@@ -247,12 +237,12 @@ const BulkImport: React.FC = () => {
             type="file"
             accept=".csv"
             onChange={handleFileChange}
-            className="flex-1 min-w-[200px] px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-500 file:text-white hover:file:bg-purple-600 file:cursor-pointer"
+            className="flex-1 min-w-[200px] px-4 py-3 bg-base border border-surfaceHover rounded-lg text-textPrimary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent file:text-black file:font-semibold hover:file:bg-accent/80 file:cursor-pointer"
           />
           {file && (
             <button
               onClick={handleClearFile}
-              className="px-4 py-3 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition-colors flex items-center justify-center"
+              className="px-4 py-3 bg-surfaceHover hover:bg-surfaceHover/70 text-textPrimary rounded-lg transition-colors flex items-center justify-center"
               title="Clear file"
             >
               <X className="w-5 h-5" />
@@ -261,23 +251,25 @@ const BulkImport: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap gap-3 mt-3">
+          {/* Import - accent (primary action) */}
           <button
             onClick={handleUpload}
             disabled={!file || loading || clearing}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-accent hover:bg-accent/80 disabled:bg-surfaceHover disabled:cursor-not-allowed text-black font-semibold rounded-lg transition-colors whitespace-nowrap"
           >
             {loading ? (
-              <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
+              <div className="animate-spin w-5 h-5 border-2 border-black border-t-transparent rounded-full"></div>
             ) : (
               <Upload className="w-5 h-5" />
             )}
             Import
           </button>
 
+          {/* Check In - green (semantic: entry/positive action) */}
           <button
             onClick={handleBulkCheckIn}
             disabled={!file || loading || clearing}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-surfaceHover disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
           >
             {loading ? (
               <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
@@ -287,10 +279,11 @@ const BulkImport: React.FC = () => {
             Check In
           </button>
 
+          {/* Check Out - amber (semantic: exit/neutral action) */}
           <button
             onClick={handleBulkCheckOut}
             disabled={!file || loading || clearing}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 disabled:bg-surfaceHover disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
           >
             {loading ? (
               <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
@@ -300,10 +293,11 @@ const BulkImport: React.FC = () => {
             Check Out
           </button>
 
+          {/* Bulk Check-In All - green (semantic: bulk entry) */}
           <button
             onClick={handleBulkCheckInAll}
             disabled={loading || clearing || bulkCheckingIn}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-surfaceHover disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
             title="Mark all registered attendees as checked in"
           >
             {bulkCheckingIn ? (
@@ -318,10 +312,12 @@ const BulkImport: React.FC = () => {
               </>
             )}
           </button>
+
+          {/* Clear — red (semantic: destructive action) */}
           <button
             onClick={handleClearAttendees}
             disabled={loading || clearing || bulkCheckingIn}
-            className="px-6 py-3 bg-red-500 hover:bg-red-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
+            className="px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-surfaceHover disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors whitespace-nowrap"
             title="Clear all attendees from database"
           >
             {clearing ? (
@@ -331,28 +327,29 @@ const BulkImport: React.FC = () => {
             )}
           </button>
         </div>
+
         {file && !loading && (
-          <p className="text-slate-400 text-sm mt-2">
+          <p className="text-textSecondary text-sm mt-2">
             Selected: {file.name} ({(file.size / 1024).toFixed(2)} KB)
           </p>
         )}
       </div>
 
-      {/* Result Display */}
+      {/* Result Display — green/red kept: functional success/error states */}
       {result && (
         <div
           className={`p-4 rounded-lg border ${result.success
-            ? 'bg-emerald-500/10 border-emerald-500/20'
+            ? 'bg-green-500/10 border-green-500/20'
             : 'bg-red-500/10 border-red-500/20'
             }`}
         >
           <div className="flex items-center gap-3 mb-3">
             {result.success ? (
-              <CheckCircle className="w-6 h-6 text-emerald-400" />
+              <CheckCircle className="w-6 h-6 text-green-400" />
             ) : (
               <XCircle className="w-6 h-6 text-red-400" />
             )}
-            <p className={`font-medium ${result.success ? 'text-emerald-400' : 'text-red-400'}`}>
+            <p className={`font-medium ${result.success ? 'text-green-400' : 'text-red-400'}`}>
               {result.message}
             </p>
           </div>
@@ -360,31 +357,30 @@ const BulkImport: React.FC = () => {
           {result.data && (
             <>
               <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="bg-slate-700/50 rounded-lg p-4">
+                <div className="bg-base rounded-lg p-4 border border-surfaceHover">
                   <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="w-5 h-5 text-emerald-400" />
-                    <span className="text-slate-400 text-sm">Success</span>
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    <span className="text-textSecondary text-sm">Success</span>
                   </div>
-                  <p className="text-3xl font-bold text-emerald-400">{result.data.imported || result.data.successfulCount}</p>
+                  <p className="text-3xl font-bold text-green-400">{result.data.imported || result.data.successfulCount}</p>
                 </div>
-                <div className="bg-slate-700/50 rounded-lg p-4">
+                <div className="bg-base rounded-lg p-4 border border-surfaceHover">
                   <div className="flex items-center gap-2 mb-2">
                     <XCircle className="w-5 h-5 text-red-400" />
-                    <span className="text-slate-400 text-sm">Failed</span>
+                    <span className="text-textSecondary text-sm">Failed</span>
                   </div>
                   <p className="text-3xl font-bold text-red-400">{result.data.failed || result.data.failedCount}</p>
                 </div>
               </div>
 
-              {/* Show failed records if any */}
               {(result.data.failedRecords || result.data.failedDetails) && ((result.data.failedRecords?.length ?? 0) > 0 || (result.data.failedDetails?.length ?? 0) > 0) && (
-                <div className="mt-4 bg-slate-700/50 rounded-lg p-4">
-                  <h4 className="text-white font-medium mb-3">Failed Records:</h4>
+                <div className="mt-4 bg-base rounded-lg p-4 border border-surfaceHover">
+                  <h4 className="text-textPrimary font-medium mb-3">Failed Records:</h4>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {(result.data.failedRecords || result.data.failedDetails)?.map((record: any, index: number) => (
-                      <div key={index} className="text-sm bg-slate-800 rounded p-2">
+                      <div key={index} className="text-sm bg-surfaceHover rounded p-2">
                         <p className="text-red-400">{record.reason}</p>
-                        <p className="text-slate-400 text-xs mt-1">
+                        <p className="text-textSecondary text-xs mt-1">
                           {record.ticketId ? `Ticket ID: ${record.ticketId}` : JSON.stringify(record.attendee)}
                         </p>
                       </div>
@@ -398,34 +394,34 @@ const BulkImport: React.FC = () => {
       )}
 
       {/* Instructions */}
-      <div className="mt-6 bg-slate-700/50 rounded-lg p-4 border border-slate-600">
-        <h4 className="text-white font-medium mb-3 flex items-center gap-2">
-          <FileText className="w-5 h-5 text-cyan-400" />
+      <div className="mt-6 bg-base rounded-lg p-4 border border-surfaceHover">
+        <h4 className="text-textPrimary font-medium mb-3 flex items-center gap-2">
+          <FileText className="w-5 h-5 text-accent" />
           CSV Format Requirements
         </h4>
-        <div className="space-y-2 text-sm text-slate-300">
+        <div className="space-y-2 text-sm text-textSecondary">
           <div className="flex items-start gap-2">
-            <span className="text-emerald-400 font-bold">✓</span>
-            <span><strong>Required columns:</strong> Name, email_ID, Ticket_Id</span>
+            <span className="text-accent font-bold">✓</span>
+            <span><strong className="text-textPrimary">Required columns:</strong> Name, email_ID, Ticket_Id</span>
           </div>
           <div className="flex items-start gap-2">
-            <span className="text-cyan-400 font-bold">•</span>
-            <span><strong>Optional columns:</strong> Phone no, Location</span>
+            <span className="text-textSecondary font-bold">•</span>
+            <span><strong className="text-textPrimary">Optional columns:</strong> Phone no, Location</span>
           </div>
           <div className="flex items-start gap-2">
-            <span className="text-cyan-400 font-bold">•</span>
-            <span><strong>Location</strong> updates Zone Occupancy on check-in</span>
+            <span className="text-textSecondary font-bold">•</span>
+            <span><strong className="text-textPrimary">Location</strong> updates Zone Occupancy on check-in</span>
           </div>
           <div className="flex items-start gap-2">
-            <span className="text-cyan-400 font-bold">•</span>
-            <span>Supports <strong>10,000+</strong> attendees per file</span>
+            <span className="text-textSecondary font-bold">•</span>
+            <span>Supports <strong className="text-textPrimary">10,000+</strong> attendees per file</span>
           </div>
           <div className="flex items-start gap-2">
-            <span className="text-cyan-400 font-bold">•</span>
+            <span className="text-textSecondary font-bold">•</span>
             <span>First row must contain column headers</span>
           </div>
           <div className="flex items-start gap-2">
-            <span className="text-cyan-400 font-bold">•</span>
+            <span className="text-textSecondary font-bold">•</span>
             <span>Each Ticket_Id must be unique</span>
           </div>
         </div>
