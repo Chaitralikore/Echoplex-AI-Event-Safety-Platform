@@ -27,7 +27,6 @@ const CheckInManager: React.FC = () => {
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-  // Fetch all checked-in attendees
   const fetchCheckedInAttendees = async () => {
     setLoadingList(true);
     try {
@@ -43,11 +42,8 @@ const CheckInManager: React.FC = () => {
     }
   };
 
-  // Fetch list on mount and after each check-in/check-out
   useEffect(() => {
     fetchCheckedInAttendees();
-    // Auto-refresh every 10 seconds
-    // Reduced from 10s to 60s for performance with large datasets
     const interval = setInterval(fetchCheckedInAttendees, 60000);
     return () => clearInterval(interval);
   }, [eventId]);
@@ -64,14 +60,8 @@ const CheckInManager: React.FC = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/attendees/check-in`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ticketId: ticketId.trim(),
-          eventId,
-          location
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticketId: ticketId.trim(), eventId, location }),
       });
 
       const data = await response.json();
@@ -80,7 +70,6 @@ const CheckInManager: React.FC = () => {
         setMessage({ type: 'success', text: data.message });
         setAttendeeData(data.data.attendee);
         setTicketId('');
-        // Refresh the checked-in list
         fetchCheckedInAttendees();
       } else {
         setMessage({ type: 'error', text: data.message });
@@ -105,13 +94,8 @@ const CheckInManager: React.FC = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/attendees/check-out`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ticketId: ticketId.trim(),
-          eventId
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticketId: ticketId.trim(), eventId }),
       });
 
       const data = await response.json();
@@ -123,7 +107,6 @@ const CheckInManager: React.FC = () => {
         });
         setAttendeeData(data.data.attendee);
         setTicketId('');
-        // Refresh the checked-in list
         fetchCheckedInAttendees();
       } else {
         setMessage({ type: 'error', text: data.message });
@@ -136,9 +119,7 @@ const CheckInManager: React.FC = () => {
     }
   };
 
-  // Quick check-out directly from the checked-in list
   const handleRowCheckOut = async (ticketIdFromRow: string) => {
-    // Reuse existing logic but with the row's ticket ID
     setTicketId(ticketIdFromRow);
     await handleCheckOut();
   };
@@ -176,29 +157,29 @@ const CheckInManager: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const badges = {
-      not_checked_in: 'bg-slate-600 text-slate-300',
-      checked_in: 'bg-emerald-500 text-white',
-      checked_out: 'bg-cyan-500 text-white'
+      not_checked_in: 'bg-surfaceHover text-textSecondary',
+      checked_in: 'bg-green-600 text-white',
+      checked_out: 'bg-accent text-black font-semibold'
     };
     return badges[status as keyof typeof badges] || badges.not_checked_in;
   };
 
   return (
-    <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+    <div className="bg-surface rounded-xl p-6 border border-surfaceHover">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-lg flex items-center justify-center">
-          <UserCheck className="w-6 h-6 text-white" />
+        <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
+          <UserCheck className="w-6 h-6 text-black" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-white">Check-In Manager</h2>
-          <p className="text-slate-400 text-sm">Manage attendee entry and exit</p>
+          <h2 className="text-xl font-semibold text-textPrimary">Check-In Manager</h2>
+          <p className="text-textSecondary text-sm">Manage attendee entry and exit</p>
         </div>
       </div>
 
       {/* Input Section */}
       <div className="space-y-4 mb-6">
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label className="block text-sm font-medium text-textSecondary mb-2">
             Ticket ID
           </label>
           <input
@@ -206,33 +187,33 @@ const CheckInManager: React.FC = () => {
             value={ticketId}
             onChange={(e) => setTicketId(e.target.value)}
             placeholder="Enter ticket ID (e.g., TKT-12345)"
-            className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            className="w-full px-4 py-2 bg-base border border-surfaceHover rounded-lg text-textPrimary placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-accent"
             disabled={loading}
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-textSecondary mb-2">
               Event ID
             </label>
             <input
               type="text"
               value={eventId}
               onChange={(e) => setEventId(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full px-4 py-2 bg-base border border-surfaceHover rounded-lg text-textPrimary focus:outline-none focus:ring-2 focus:ring-accent"
               disabled={loading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-textSecondary mb-2">
               Location
             </label>
             <select
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full px-4 py-2 bg-base border border-surfaceHover rounded-lg text-textPrimary focus:outline-none focus:ring-2 focus:ring-accent"
               disabled={loading}
             >
               <option value="Main Entrance">Main Entrance</option>
@@ -244,12 +225,12 @@ const CheckInManager: React.FC = () => {
         </div>
       </div>
 
-      {/* Action Buttons */}
+      {/* Action Buttons — green=check in (entry), surfaceHover=check out (neutral exit), accent=status (primary query) */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <button
           onClick={handleCheckIn}
           disabled={loading}
-          className="flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 disabled:bg-surfaceHover disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
         >
           <UserCheck className="w-5 h-5" />
           Check In
@@ -258,7 +239,7 @@ const CheckInManager: React.FC = () => {
         <button
           onClick={handleCheckOut}
           disabled={loading}
-          className="flex items-center justify-center gap-2 px-4 py-3 bg-cyan-500 hover:bg-cyan-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-3 bg-surfaceHover hover:bg-surfaceHover/70 disabled:opacity-50 disabled:cursor-not-allowed text-textPrimary rounded-lg font-medium transition-colors border border-surfaceHover"
         >
           <UserX className="w-5 h-5" />
           Check Out
@@ -267,19 +248,19 @@ const CheckInManager: React.FC = () => {
         <button
           onClick={handleCheckStatus}
           disabled={loading}
-          className="flex items-center justify-center gap-2 px-4 py-3 bg-teal-500 hover:bg-teal-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-3 bg-accent hover:bg-accent/80 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold rounded-lg transition-colors"
         >
           <Search className="w-5 h-5" />
           Status
         </button>
       </div>
 
-      {/* Message Display */}
+      {/* Message Display — green/red kept: functional success/error */}
       {message && (
         <div
           className={`p-4 rounded-lg mb-6 ${message.type === 'success'
-              ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-              : 'bg-red-500/10 border border-red-500/20 text-red-400'
+            ? 'bg-green-500/10 border border-green-500/20 text-green-400'
+            : 'bg-red-500/10 border border-red-500/20 text-red-400'
             }`}
         >
           {message.text}
@@ -288,9 +269,9 @@ const CheckInManager: React.FC = () => {
 
       {/* Attendee Info Display */}
       {attendeeData && (
-        <div className="bg-slate-700 rounded-lg p-4 border border-slate-600">
+        <div className="bg-base rounded-lg p-4 border border-surfaceHover">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">{attendeeData.name}</h3>
+            <h3 className="text-lg font-semibold text-textPrimary">{attendeeData.name}</h3>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(attendeeData.status)}`}>
               {attendeeData.status.replace('_', ' ').toUpperCase()}
             </span>
@@ -298,42 +279,42 @@ const CheckInManager: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-slate-400">Email</p>
-              <p className="text-white">{attendeeData.email}</p>
+              <p className="text-textSecondary">Email</p>
+              <p className="text-textPrimary">{attendeeData.email}</p>
             </div>
             <div>
-              <p className="text-slate-400">Phone</p>
-              <p className="text-white">{attendeeData.phone || 'N/A'}</p>
+              <p className="text-textSecondary">Phone</p>
+              <p className="text-textPrimary">{attendeeData.phone || 'N/A'}</p>
             </div>
             <div>
-              <p className="text-slate-400">Ticket ID</p>
-              <p className="text-white">{attendeeData.ticketId}</p>
+              <p className="text-textSecondary">Ticket ID</p>
+              <p className="text-textPrimary">{attendeeData.ticketId}</p>
             </div>
             <div>
-              <p className="text-slate-400">Attendee ID</p>
-              <p className="text-white">{attendeeData.id}</p>
+              <p className="text-textSecondary">Attendee ID</p>
+              <p className="text-textPrimary">{attendeeData.id}</p>
             </div>
           </div>
 
           {attendeeData.checkInTime && (
-            <div className="mt-4 pt-4 border-t border-slate-600">
-              <div className="flex items-center gap-2 text-emerald-400 mb-2">
+            <div className="mt-4 pt-4 border-t border-surfaceHover">
+              <div className="flex items-center gap-2 text-accent mb-2">
                 <Clock className="w-4 h-4" />
                 <span className="text-sm font-medium">Check-in Details</span>
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-slate-400">Time</p>
-                  <p className="text-white">
+                  <p className="text-textSecondary">Time</p>
+                  <p className="text-textPrimary">
                     {new Date(attendeeData.checkInTime).toLocaleString()}
                   </p>
                 </div>
                 {attendeeData.location && (
                   <div>
-                    <p className="text-slate-400">Location</p>
+                    <p className="text-textSecondary">Location</p>
                     <div className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-cyan-400" />
-                      <p className="text-white">{attendeeData.location}</p>
+                      <MapPin className="w-3 h-3 text-accent" />
+                      <p className="text-textPrimary">{attendeeData.location}</p>
                     </div>
                   </div>
                 )}
@@ -342,13 +323,13 @@ const CheckInManager: React.FC = () => {
           )}
 
           {attendeeData.checkOutTime && (
-            <div className="mt-4 pt-4 border-t border-slate-600">
-              <div className="flex items-center gap-2 text-cyan-400 mb-2">
+            <div className="mt-4 pt-4 border-t border-surfaceHover">
+              <div className="flex items-center gap-2 text-accent mb-2">
                 <Clock className="w-4 h-4" />
                 <span className="text-sm font-medium">Check-out Details</span>
               </div>
-              <p className="text-slate-400 text-sm">Time</p>
-              <p className="text-white text-sm">
+              <p className="text-textSecondary text-sm">Time</p>
+              <p className="text-textPrimary text-sm">
                 {new Date(attendeeData.checkOutTime).toLocaleString()}
               </p>
             </div>
@@ -357,18 +338,18 @@ const CheckInManager: React.FC = () => {
       )}
 
       {/* All Checked-In Attendees List */}
-      <div className="mt-6 bg-slate-700 rounded-lg border border-slate-600">
-        <div className="flex items-center justify-between p-4 border-b border-slate-600">
+      <div className="mt-6 bg-base rounded-lg border border-surfaceHover">
+        <div className="flex items-center justify-between p-4 border-b border-surfaceHover">
           <div className="flex items-center gap-3">
-            <Users className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-lg font-semibold text-white">
+            <Users className="w-5 h-5 text-accent" />
+            <h3 className="text-lg font-semibold text-textPrimary">
               All Checked-In Attendees ({checkedInList.length})
             </h3>
           </div>
           <button
             onClick={fetchCheckedInAttendees}
             disabled={loadingList}
-            className="flex items-center gap-2 px-3 py-1.5 bg-slate-600 hover:bg-slate-500 text-white rounded-lg text-sm transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 bg-surfaceHover hover:bg-surfaceHover/70 text-textPrimary rounded-lg text-sm transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${loadingList ? 'animate-spin' : ''}`} />
             Refresh
@@ -376,41 +357,41 @@ const CheckInManager: React.FC = () => {
         </div>
 
         {checkedInList.length === 0 ? (
-          <div className="p-8 text-center text-slate-400">
+          <div className="p-8 text-center text-textSecondary">
             <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
             <p>No attendees checked in yet</p>
           </div>
         ) : (
           <div className="max-h-96 overflow-y-auto">
             <table className="w-full">
-              <thead className="bg-slate-800 sticky top-0">
+              <thead className="bg-surface sticky top-0">
                 <tr>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-300">Name</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-300">Ticket ID</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-300">Location</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-300">Check-In Time</th>
-                  <th className="text-left px-4 py-3 text-sm font-medium text-slate-300">Actions</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-textSecondary">Name</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-textSecondary">Ticket ID</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-textSecondary">Location</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-textSecondary">Check-In Time</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-textSecondary">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-600">
+              <tbody className="divide-y divide-surfaceHover">
                 {checkedInList.map((attendee) => (
-                  <tr key={attendee.id} className="hover:bg-slate-600/50 transition-colors">
+                  <tr key={attendee.id} className="hover:bg-surfaceHover/30 transition-colors">
                     <td className="px-4 py-3">
                       <div>
-                        <p className="text-white font-medium">{attendee.name}</p>
-                        <p className="text-slate-400 text-xs">{attendee.email}</p>
+                        <p className="text-textPrimary font-medium">{attendee.name}</p>
+                        <p className="text-textSecondary text-xs">{attendee.email}</p>
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-cyan-400 font-mono text-sm">{attendee.ticketId}</span>
+                      <span className="text-accent font-mono text-sm">{attendee.ticketId}</span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-1 text-slate-300 text-sm">
-                        <MapPin className="w-3 h-3 text-emerald-400" />
+                      <div className="flex items-center gap-1 text-textSecondary text-sm">
+                        <MapPin className="w-3 h-3 text-accent" />
                         {attendee.location || 'Unknown'}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-slate-300 text-sm">
+                    <td className="px-4 py-3 text-textSecondary text-sm">
                       {attendee.checkInTime
                         ? new Date(attendee.checkInTime).toLocaleString()
                         : 'N/A'
@@ -420,7 +401,7 @@ const CheckInManager: React.FC = () => {
                       <button
                         onClick={() => handleRowCheckOut(attendee.ticketId)}
                         disabled={loading || loadingList}
-                        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-cyan-500 hover:bg-cyan-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white transition-colors"
+                        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-surfaceHover hover:bg-surfaceHover/70 disabled:opacity-50 disabled:cursor-not-allowed text-textPrimary transition-colors"
                       >
                         Check Out
                       </button>
